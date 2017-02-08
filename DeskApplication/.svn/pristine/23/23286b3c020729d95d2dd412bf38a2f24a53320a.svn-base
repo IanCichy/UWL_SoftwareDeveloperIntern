@@ -1,0 +1,179 @@
+﻿<%@ Page Language="C#" MasterPageFile="~/Top.master" AutoEventWireup="true" CodeFile="ViewApplication.aspx.cs"
+    Inherits="ViewApplication" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <asp:ScriptManager ID="ScriptManager1" runat="server">
+    </asp:ScriptManager>
+    <div runat="server" id="content">
+        <table style="width: 100%">
+            <tr>
+                <td>
+                    <table style="width: 100%">
+                        <tr>
+                            <td class="prequestiontext">
+                                Student ID:
+                            </td>
+                            <td class="prequestionbox">
+                                <div runat="server" id="stuiddiv">
+                                    <asp:TextBox ID="stuidbox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="prequestiontext">
+                                First Name:
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="firstnamebox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="prequestiontext">
+                                Last Name:
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="lastnamebox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                          <tr>
+                            <td class="prequestiontext">
+                                Email Address:
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="emailbox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                          <tr>
+                            <td class="prequestiontext">
+                                Phone Number:
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="phonebox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="prequestiontext">
+                                What is your major/minor?
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="majorbox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="prequestiontext">
+                                What is your current year in school?
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="yearbox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="prequestiontext">
+                                Are you currently receiving work study?
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="workstudybox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                      
+                        <tr>
+                            <td class="prequestiontext">
+                                What is your anticipated credit load?
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="creditbox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                      
+                        <tr>
+                            <td class="prequestiontext">
+                                Is your GPA below 2.0? If yes, why?
+                            </td>
+                            <td class="prequestionbox">
+                                <asp:TextBox ID="gpabox" Enabled="false" CssClass="contenttextbox2" runat="server"></asp:TextBox>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <asp:Repeater ID="questions" runat="server">
+                        <HeaderTemplate>
+                            <table>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <tr>
+                                <td>
+                                    <%# DataBinder.Eval(Container.DataItem, "QuestionNum") %>.
+                                    <%# DataBinder.Eval(Container.DataItem, "QuestionText") %>
+                                    <br />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <asp:TextBox Text='<%# DataBinder.Eval(Container.DataItem, "AnswerText") %>' Enabled="false"
+                                        TextMode="MultiLine" ID="questionbox" CssClass="questiontextbox" runat="server"></asp:TextBox>
+                                </td>
+                            </tr>
+                        </ItemTemplate>
+                        <FooterTemplate>
+                            </table>
+                        </FooterTemplate>
+                    </asp:Repeater>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <asp:Repeater ID="outerRep" runat="server">
+                        <HeaderTemplate>
+                            <table class="timesmastertable">
+                                <tr>
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <td class="timessecondarytable">
+                                <table>
+                                    <tr>
+                                        <td class="timesrow">
+                                            <%# DataBinder.Eval(Container.DataItem, "Date") %>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <asp:Repeater ID="innerRep" runat="server">
+                                                <HeaderTemplate>
+                                                    <table>
+                                                </HeaderTemplate>
+                                                <ItemTemplate>
+                                                    <tr>
+                                                        <td>
+                                                            <asp:CheckBox ID="verifytime" runat="server" Checked="false" Enabled="false" />
+                                                            <asp:HiddenField ID="timeID" runat="server" Value='<%# DataBinder.Eval(Container.DataItem, "TimeID") %>' />
+                                                        </td>
+                                                        <td>
+                                                            <%# DataBinder.Eval(Container.DataItem, "StartTime") %>
+                                                            -
+                                                            <%# DataBinder.Eval(Container.DataItem, "EndTime") %>
+                                                        </td>
+                                                    </tr>
+                                                </ItemTemplate>
+                                                <FooterTemplate>
+                                                    </table>
+                                                </FooterTemplate>
+                                            </asp:Repeater>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </ItemTemplate>
+                        <FooterTemplate>
+                            </tr> </table>
+                        </FooterTemplate>
+                    </asp:Repeater>
+                </td>
+            </tr>
+        </table>
+    </div>
+</asp:Content>

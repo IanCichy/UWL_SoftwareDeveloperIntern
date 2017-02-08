@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class Stats : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["hall"] == null)
+        {
+            Session["warning"] = "No hall chosen. Please choose a hall";
+            Response.Redirect("chooseHall.aspx");
+        }
+        sqlPizzaStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+        sqlProductStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+    }
+}

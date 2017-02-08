@@ -1,0 +1,267 @@
+﻿namespace FDM3
+{
+    partial class PizzaSellOptions
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.lblPizzaName = new System.Windows.Forms.Label();
+            this.groupBoxSellCreditPizza = new System.Windows.Forms.GroupBox();
+            this.radioButtonOther = new System.Windows.Forms.RadioButton();
+            this.radioButtonProgramPizza = new System.Windows.Forms.RadioButton();
+            this.radioButtonBurnedRuined = new System.Windows.Forms.RadioButton();
+            this.label1 = new System.Windows.Forms.Label();
+            this.radioButtonSell = new System.Windows.Forms.RadioButton();
+            this.btnSell = new System.Windows.Forms.Button();
+            this.txtDcNote = new System.Windows.Forms.TextBox();
+            this.btnCancel = new System.Windows.Forms.Button();
+            this.lblDcNote = new System.Windows.Forms.Label();
+            this.lblAmount = new System.Windows.Forms.Label();
+            this.lblCost = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.groupBoxSellCreditPizza.SuspendLayout();
+            this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // lblPizzaName
+            // 
+            this.lblPizzaName.AutoSize = true;
+            this.lblPizzaName.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblPizzaName.ForeColor = System.Drawing.Color.Red;
+            this.lblPizzaName.Location = new System.Drawing.Point(10, 5);
+            this.lblPizzaName.Name = "lblPizzaName";
+            this.lblPizzaName.Size = new System.Drawing.Size(102, 24);
+            this.lblPizzaName.TabIndex = 0;
+            this.lblPizzaName.Text = "Pizza Type";
+            // 
+            // groupBoxSellCreditPizza
+            // 
+            this.groupBoxSellCreditPizza.BackColor = System.Drawing.Color.White;
+            this.groupBoxSellCreditPizza.Controls.Add(this.radioButtonOther);
+            this.groupBoxSellCreditPizza.Controls.Add(this.radioButtonProgramPizza);
+            this.groupBoxSellCreditPizza.Controls.Add(this.radioButtonBurnedRuined);
+            this.groupBoxSellCreditPizza.Controls.Add(this.label1);
+            this.groupBoxSellCreditPizza.Controls.Add(this.radioButtonSell);
+            this.groupBoxSellCreditPizza.Location = new System.Drawing.Point(3, 3);
+            this.groupBoxSellCreditPizza.Name = "groupBoxSellCreditPizza";
+            this.groupBoxSellCreditPizza.Size = new System.Drawing.Size(173, 149);
+            this.groupBoxSellCreditPizza.TabIndex = 7;
+            this.groupBoxSellCreditPizza.TabStop = false;
+            this.groupBoxSellCreditPizza.Text = "Select Sell or Credit Type";
+            // 
+            // radioButtonOther
+            // 
+            this.radioButtonOther.AutoSize = true;
+            this.radioButtonOther.Location = new System.Drawing.Point(19, 123);
+            this.radioButtonOther.Name = "radioButtonOther";
+            this.radioButtonOther.Size = new System.Drawing.Size(51, 17);
+            this.radioButtonOther.TabIndex = 6;
+            this.radioButtonOther.TabStop = true;
+            this.radioButtonOther.Text = "Other";
+            this.radioButtonOther.UseVisualStyleBackColor = true;
+            this.radioButtonOther.CheckedChanged += new System.EventHandler(this.radioButtonOther_CheckedChanged);
+            // 
+            // radioButtonProgramPizza
+            // 
+            this.radioButtonProgramPizza.AutoSize = true;
+            this.radioButtonProgramPizza.Location = new System.Drawing.Point(19, 100);
+            this.radioButtonProgramPizza.Name = "radioButtonProgramPizza";
+            this.radioButtonProgramPizza.Size = new System.Drawing.Size(92, 17);
+            this.radioButtonProgramPizza.TabIndex = 3;
+            this.radioButtonProgramPizza.TabStop = true;
+            this.radioButtonProgramPizza.Text = "Program Pizza";
+            this.radioButtonProgramPizza.UseVisualStyleBackColor = true;
+            this.radioButtonProgramPizza.CheckedChanged += new System.EventHandler(this.radioButtonProgramPizza_CheckedChanged);
+            // 
+            // radioButtonBurnedRuined
+            // 
+            this.radioButtonBurnedRuined.AutoSize = true;
+            this.radioButtonBurnedRuined.Location = new System.Drawing.Point(19, 76);
+            this.radioButtonBurnedRuined.Name = "radioButtonBurnedRuined";
+            this.radioButtonBurnedRuined.Size = new System.Drawing.Size(96, 17);
+            this.radioButtonBurnedRuined.TabIndex = 2;
+            this.radioButtonBurnedRuined.TabStop = true;
+            this.radioButtonBurnedRuined.Text = "Burned Ruined";
+            this.radioButtonBurnedRuined.UseVisualStyleBackColor = true;
+            this.radioButtonBurnedRuined.CheckedChanged += new System.EventHandler(this.radioButtonBurnedRuined_CheckedChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(16, 57);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(85, 13);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Credit Option:";
+            // 
+            // radioButtonSell
+            // 
+            this.radioButtonSell.AutoSize = true;
+            this.radioButtonSell.Location = new System.Drawing.Point(19, 26);
+            this.radioButtonSell.Name = "radioButtonSell";
+            this.radioButtonSell.Size = new System.Drawing.Size(82, 17);
+            this.radioButtonSell.TabIndex = 0;
+            this.radioButtonSell.TabStop = true;
+            this.radioButtonSell.Text = "Normal Sale";
+            this.radioButtonSell.UseVisualStyleBackColor = true;
+            this.radioButtonSell.CheckedChanged += new System.EventHandler(this.radioButtonSell_CheckedChanged);
+            // 
+            // btnSell
+            // 
+            this.btnSell.BackColor = System.Drawing.Color.LightGreen;
+            this.btnSell.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSell.Location = new System.Drawing.Point(76, 158);
+            this.btnSell.Name = "btnSell";
+            this.btnSell.Size = new System.Drawing.Size(101, 36);
+            this.btnSell.TabIndex = 13;
+            this.btnSell.Text = "Sell";
+            this.btnSell.UseVisualStyleBackColor = false;
+            this.btnSell.Click += new System.EventHandler(this.btnSell_Click);
+            // 
+            // txtDcNote
+            // 
+            this.txtDcNote.BackColor = System.Drawing.SystemColors.Control;
+            this.txtDcNote.Location = new System.Drawing.Point(182, 28);
+            this.txtDcNote.Multiline = true;
+            this.txtDcNote.Name = "txtDcNote";
+            this.txtDcNote.Size = new System.Drawing.Size(191, 123);
+            this.txtDcNote.TabIndex = 14;
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.BackColor = System.Drawing.Color.IndianRed;
+            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCancel.Location = new System.Drawing.Point(183, 157);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(101, 37);
+            this.btnCancel.TabIndex = 15;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = false;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
+            // lblDcNote
+            // 
+            this.lblDcNote.AutoSize = true;
+            this.lblDcNote.Location = new System.Drawing.Point(182, 10);
+            this.lblDcNote.Name = "lblDcNote";
+            this.lblDcNote.Size = new System.Drawing.Size(69, 13);
+            this.lblDcNote.TabIndex = 16;
+            this.lblDcNote.Text = "Note For DC:";
+            // 
+            // lblAmount
+            // 
+            this.lblAmount.AutoSize = true;
+            this.lblAmount.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblAmount.Location = new System.Drawing.Point(10, 40);
+            this.lblAmount.Name = "lblAmount";
+            this.lblAmount.Size = new System.Drawing.Size(76, 24);
+            this.lblAmount.TabIndex = 17;
+            this.lblAmount.Text = "Amount";
+            // 
+            // lblCost
+            // 
+            this.lblCost.AutoSize = true;
+            this.lblCost.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCost.Location = new System.Drawing.Point(10, 75);
+            this.lblCost.Name = "lblCost";
+            this.lblCost.Size = new System.Drawing.Size(47, 24);
+            this.lblCost.TabIndex = 18;
+            this.lblCost.Text = "Cost";
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.Color.White;
+            this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.lblCost);
+            this.panel1.Controls.Add(this.lblAmount);
+            this.panel1.Controls.Add(this.lblPizzaName);
+            this.panel1.Location = new System.Drawing.Point(10, 10);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(385, 110);
+            this.panel1.TabIndex = 19;
+            // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.White;
+            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel2.Controls.Add(this.groupBoxSellCreditPizza);
+            this.panel2.Controls.Add(this.txtDcNote);
+            this.panel2.Controls.Add(this.btnCancel);
+            this.panel2.Controls.Add(this.lblDcNote);
+            this.panel2.Controls.Add(this.btnSell);
+            this.panel2.Location = new System.Drawing.Point(10, 126);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(385, 199);
+            this.panel2.TabIndex = 20;
+            // 
+            // PizzaSellOptions
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImage = global::FDM3.Properties.Resources.light_grey_wash_wall;
+            this.ClientSize = new System.Drawing.Size(404, 332);
+            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.panel1);
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(420, 370);
+            this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(420, 370);
+            this.Name = "PizzaSellOptions";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "PizzaSellOptions";
+            this.Load += new System.EventHandler(this.PizzaSellOptions_Load);
+            this.groupBoxSellCreditPizza.ResumeLayout(false);
+            this.groupBoxSellCreditPizza.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
+            this.ResumeLayout(false);
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Label lblPizzaName;
+        private System.Windows.Forms.GroupBox groupBoxSellCreditPizza;
+        private System.Windows.Forms.RadioButton radioButtonProgramPizza;
+        private System.Windows.Forms.RadioButton radioButtonBurnedRuined;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.RadioButton radioButtonSell;
+        private System.Windows.Forms.Button btnSell;
+        private System.Windows.Forms.TextBox txtDcNote;
+        private System.Windows.Forms.RadioButton radioButtonOther;
+        private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Label lblDcNote;
+        private System.Windows.Forms.Label lblAmount;
+        private System.Windows.Forms.Label lblCost;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel2;
+    }
+}

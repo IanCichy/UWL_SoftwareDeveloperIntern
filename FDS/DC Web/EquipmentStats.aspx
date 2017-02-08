@@ -1,0 +1,50 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="EquipmentStats.aspx.cs" Inherits="EquipmentStats" MasterPageFile="MasterPage.master" EnableEventValidation="false" MaintainScrollPositionOnPostback="true" %>
+
+<asp:Content runat="server" ContentPlaceHolderID="body">
+
+    <form id="FrmEquipStats" runat="server">
+
+        <br />
+        <br />
+        <asp:DropDownList runat="server" ID="ddlTerms" CssClass="dropdown" OnSelectedIndexChanged="ddlTerms_SelectedIndexChanged" AutoPostBack="true" />
+        <br />
+        <br />
+        <asp:Label ID="LblItems" runat="server" Text="Items per page" />
+        <asp:DropDownList ID="DdlItemsfilter" runat="server" OnSelectedIndexChanged="DdlItemsfilter_SelectedIndexChanged" AutoPostBack="true">
+            <asp:ListItem Text="15" Value="15" />
+            <asp:ListItem Text="25" Value="25" />
+            <asp:ListItem Text="50" Value="50" />
+            <asp:ListItem Text="100" Value="100" />
+            <asp:ListItem Text="All" Value="999" />
+        </asp:DropDownList>
+        <div runat="server" id="divEquipmentStats">
+            <asp:GridView ID="gvEquipmentStats" runat="server" AutoGenerateColumns="false" AllowPaging="true" AllowSorting="true" PageSize="15"
+                DataSourceID="sqlEquipmentStats" BorderWidth="1px" OnRowCreated="gvEquipmentStats_RowCreated">
+                <PagerStyle CssClass="pager-row" />
+                <EditRowStyle CssClass="edit-row" />
+                <SortedAscendingCellStyle CssClass="Asc_Des_Cell" />
+                <SortedAscendingHeaderStyle CssClass="Asc_Des_Header" />
+                <SortedDescendingCellStyle CssClass="Asc_Des_Cell" />
+                <SortedDescendingHeaderStyle CssClass="Asc_Des_Header" />
+                <Columns>
+                    <asp:BoundField DataField="name" HeaderText="Description" SortExpression="name" />
+                    <asp:BoundField DataField="category" HeaderText="Category" SortExpression="category" />
+                    <asp:BoundField DataField="description" HeaderText="Condition" SortExpression="description" />
+                    <asp:BoundField DataField="TotalCheckout" HeaderText="Total Checkout" SortExpression="TotalCheckout" />
+                </Columns>
+                <EmptyDataTemplate>
+                    No Stats On Record For This Term
+                </EmptyDataTemplate>
+            </asp:GridView>
+            <asp:SqlDataSource ID="sqlEquipmentStats" runat="server" SelectCommandType="StoredProcedure" SelectCommand="EquipmentStatsForHall">
+                <SelectParameters>
+                    <asp:SessionParameter Name="hallID" SessionField="hall" DefaultValue="-1" />
+                    <asp:SessionParameter Name="startDate" SessionField="startDate" DefaultValue="7/1/2014" />
+                    <asp:SessionParameter Name="endDate" SessionField="endDate" DefaultValue="12/30/2099" />
+                </SelectParameters>
+            </asp:SqlDataSource>
+        </div>
+        <br />
+        <br />
+    </form>
+</asp:Content>

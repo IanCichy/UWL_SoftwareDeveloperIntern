@@ -1,0 +1,174 @@
+﻿using System;
+using System.Web.UI.WebControls;
+
+public partial class Stats : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["hall"] == null)
+        {
+            Session["warning"] = "No hall chosen. Please choose a hall";
+            Response.Redirect("chooseHall.aspx");
+        }
+        sqlPizzaStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+        sqlProductStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+        sqlWorkerStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+        Colorize();
+    }
+
+    private void Colorize()
+    {
+        foreach (GridViewRow row in gvWorkerStats.Rows)
+        {
+            if (row.RowType == DataControlRowType.DataRow)
+            {
+                int totalShifts = int.Parse(row.Cells[1].Text.ToString());
+                int errorPizza = int.Parse(row.Cells[2].Text.ToString());
+                int errorIn = int.Parse(row.Cells[3].Text.ToString());
+                int errorOut = int.Parse(row.Cells[4].Text.ToString());
+            }
+        }
+    }
+
+    protected void btnPizzaStats_Click(object sender, EventArgs e)
+    {
+        if (divPizzaStats.Style["Display"] == "inline")
+        {
+            divPizzaStats.Style["Display"] = "none";
+        }
+        else
+            divPizzaStats.Style["Display"] = "inline";
+    }
+
+    protected void btnProductStats_Click(object sender, EventArgs e)
+    {
+        if (divProductStats.Style["Display"] == "inline")
+        {
+            divProductStats.Style["Display"] = "none";
+        }
+        else
+            divProductStats.Style["Display"] = "inline";
+    }
+
+    protected void btnWorkerStats_Click(object sender, EventArgs e)
+    {
+        if (divWorkerStats.Style["Display"] == "inline")
+        {
+            divWorkerStats.Style["Display"] = "none";
+        }
+        else
+            divWorkerStats.Style["Display"] = "inline";
+    }
+
+    #region sorting
+
+    /*
+ * Created by: Ian Cichy - 6/14
+ * pre/post:Standard method used for all gridviews to display up/down arrows
+ * when the data rows are being sorted
+ */
+
+    protected void gvWorkerStats_RowCreated(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.Header)
+        {
+            foreach (TableCell tc in e.Row.Cells)
+            {
+                if (tc.HasControls())
+                {
+                    // search for the header link
+                    LinkButton lnk = (LinkButton)tc.Controls[0];
+                    if (lnk != null)
+                    {
+                        // inizialize a new image
+                        System.Web.UI.WebControls.Image img = new System.Web.UI.WebControls.Image();
+                        // setting the dynamically URL of the image
+                        img.ImageUrl = "Assets/Images/" + (gvWorkerStats.SortDirection == SortDirection.Ascending ? "arrow_up" : "arrow_down") + ".png";
+                        img.Width = 16;
+                        img.Height = 8;
+                        // checking if the header link is the user's choice
+                        if (gvWorkerStats.SortExpression == lnk.CommandArgument)
+                        {
+                            // adding a space and the image to the header link
+                            tc.Controls.Add(img);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+* Created by: Ian Cichy - 6/14
+* pre/post:Standard method used for all gridviews to display up/down arrows
+* when the data rows are being sorted
+*/
+
+    protected void gvPizzaStats_RowCreated(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.Header)
+        {
+            foreach (TableCell tc in e.Row.Cells)
+            {
+                if (tc.HasControls())
+                {
+                    // search for the header link
+                    LinkButton lnk = (LinkButton)tc.Controls[0];
+                    if (lnk != null)
+                    {
+                        // inizialize a new image
+                        System.Web.UI.WebControls.Image img = new System.Web.UI.WebControls.Image();
+                        // setting the dynamically URL of the image
+                        img.ImageUrl = "Assets/Images/" + (gvPizzaStats.SortDirection == SortDirection.Ascending ? "arrow_up" : "arrow_down") + ".png";
+                        img.Width = 16;
+                        img.Height = 8;
+                        // checking if the header link is the user's choice
+                        if (gvPizzaStats.SortExpression == lnk.CommandArgument)
+                        {
+                            // adding a space and the image to the header link
+                            tc.Controls.Add(img);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+* Created by: Ian Cichy - 6/14
+* pre/post:Standard method used for all gridviews to display up/down arrows
+* when the data rows are being sorted
+*/
+
+    protected void gvProductStats_RowCreated(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.Header)
+        {
+            foreach (TableCell tc in e.Row.Cells)
+            {
+                if (tc.HasControls())
+                {
+                    // search for the header link
+                    LinkButton lnk = (LinkButton)tc.Controls[0];
+                    if (lnk != null)
+                    {
+                        // inizialize a new image
+                        System.Web.UI.WebControls.Image img = new System.Web.UI.WebControls.Image();
+                        // setting the dynamically URL of the image
+                        img.ImageUrl = "Assets/Images/" + (gvProductStats.SortDirection == SortDirection.Ascending ? "arrow_up" : "arrow_down") + ".png";
+                        img.Width = 16;
+                        img.Height = 8;
+                        // checking if the header link is the user's choice
+                        if (gvProductStats.SortExpression == lnk.CommandArgument)
+                        {
+                            // adding a space and the image to the header link
+                            tc.Controls.Add(img);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #endregion sorting
+}

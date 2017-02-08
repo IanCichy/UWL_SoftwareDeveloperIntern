@@ -1,0 +1,131 @@
+ #region studentIN/Out
+
+        /*
+         *   Searches for students in the database based on the given parameters and HallID
+         *      Pre:Name
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchCheckIn_Click(object sender, EventArgs e)
+        {
+            BindingSource bs = new BindingSource();
+            bs.DataSource = DGVStudentCheckIn.DataSource;
+            String search = txtCheckInSearch.Text.Replace("[", "").Replace("]", "");
+            bs.Filter = "FirstName like '%" + search + "%' OR LastName like '%" + search + "%'";
+        }
+
+        /*
+         *   Searches for students in the database based on the given parameters and HallID
+         *      Pre:Name
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchCheckOut_Click(object sender, EventArgs e)
+        {
+            BindingSource bs = new BindingSource();
+            bs.DataSource = DGVStudentCheckOut.DataSource;
+            String search = txtCheckOutSearch.Text.Replace("[", "").Replace("]", "");
+            bs.Filter = "FirstName like '%" + search + "%' OR LastName like '%" + search + "%'";
+        }
+
+        /*
+         * Checks in a student who is currently not checked into the hall
+         *      Tables are populated manually before check in
+         */
+
+        private void btnCheckInStudent_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVStudentCheckIn.Columns["btnCheckInStudent"].Index && e.RowIndex >= 0)
+            {
+                if (DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInPhoneNumber"].Value != null &&
+                    !DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInPhoneNumber"].Value.ToString().Trim().Equals(""))
+                {
+                    int StudentID = int.Parse(DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInStudentID"].Value.ToString());
+                    String phoneNum = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInPhoneNumber"].Value.ToString();
+                    String FName = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInFirstName"].Value.ToString();
+                    String LName = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInLastName"].Value.ToString();
+                    String Rnum = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInRoom"].Value.ToString();
+
+                    DialogResult result = MessageBox.Show("Are you sure you want to check in\nStudent: " + FName +
+                        " " + LName + "\nRoom Number: " + Rnum + "\nPhone Number: " + phoneNum,
+                              "Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        FDS.Shift.CheckInStudent(StudentID);
+                        FDS.Shift.CheckInPhone(StudentID, phoneNum);
+                        RefreshGridViews_CheckInOut();
+                    }
+                }
+                else
+                {
+                    int StudentID = int.Parse(DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInStudentID"].Value.ToString());
+                    String FName = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInFirstName"].Value.ToString();
+                    String LName = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInLastName"].Value.ToString();
+                    String Rnum = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInRoom"].Value.ToString();
+
+                    DialogResult result = MessageBox.Show("Would you like to add a phone number?",
+                              "Phone Number", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.No)
+                    {
+                        DialogResult result2 = MessageBox.Show("Are you sure you want to check in\nStudent: " +
+                            FName + " " + LName + "\nRoom Number: " + Rnum + "\nPhone Number: NONE",
+                               "Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result2 == DialogResult.Yes)
+                        {
+                            FDS.Shift.CheckInStudent(StudentID);
+                            RefreshGridViews_CheckInOut();
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+         * Checks OUT Students in the database who are still currently checked into a hall
+         *      tables are populated manually before checkout
+         */
+
+        private void btnCheckOutStudent_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVStudentCheckOut.Columns["btnCheckOutStudent"].Index && e.RowIndex >= 0)
+            {
+                String FName = DGVStudentCheckOut.Rows[e.RowIndex].Cells["CheckOutFirstName"].Value.ToString().Trim();
+                String LName = DGVStudentCheckOut.Rows[e.RowIndex].Cells["CheckOutLastName"].Value.ToString();
+                String Rnum = DGVStudentCheckOut.Rows[e.RowIndex].Cells["CheckOutRoom"].Value.ToString();
+                int StudentID = int.Parse(DGVStudentCheckOut.Rows[e.RowIndex].Cells["CheckOutStudentID"].Value.ToString());
+
+                DialogResult result2 = MessageBox.Show("Are you sure you want to check out\nStudent: " +
+                    FName + " " + LName + "\nRoom Number: " + Rnum,
+                               "Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result2 == DialogResult.Yes)
+                {
+                    FDS.Shift.CheckOutStudent(StudentID);
+                    RefreshGridViews_CheckInOut();
+                }
+            }
+        }
+
+        #endregion studentIN/Out
+
+
+
+
+
+
+
+
+
+
+            //TAB CHECK IN/OUT
+            this.checkOutStudentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet15.CheckOutStudentForHall, HallName);
+            this.checkInStudentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet16.CheckInStudentForHall, HallName);
+
+
+
+
+
+        public void RefreshGridViews_CheckInOut()
+        {
+            this.checkOutStudentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet15.CheckOutStudentForHall, HallName);
+            this.checkInStudentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet16.CheckInStudentForHall, HallName);
+        }

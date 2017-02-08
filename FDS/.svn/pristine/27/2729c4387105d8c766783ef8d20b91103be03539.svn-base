@@ -1,0 +1,50 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Stats.aspx.cs" Inherits="Stats" MasterPageFile="MasterPage.master" EnableEventValidation="false" MaintainScrollPositionOnPostback="true" %>
+
+<asp:Content runat="server" ContentPlaceHolderID="body">
+
+    <form id="Form1" runat="server">
+
+        <script src="Scripts/jquery-2.1.0.min.js"></script>
+        <script src="Scripts/Chart.js"></script>
+        <script src="Scripts/Chart.min.js"></script>
+        <script src="Scripts/Stats.js"></script>
+
+        <br />
+        <br />
+
+            <div class="graph-container">
+                <canvas id="statsCanvas" width="1000" height="400"></canvas>
+                <div id="legend">
+                </div>
+            </div>
+
+        <br />
+        <br />
+        
+        <div class="marginStats">
+            <button class="button" onclick="return OpenPizzaByDayOfWeekLine(true);" style="width: 30%;">Pizzas by Day</button>
+            <button class="button" onclick="return OpenPizzaByDayOfWeekLine()" style="width: 30%;">Pizzas by Day All Halls</button>
+            <button class="button" onclick="return OpenPizzaByDayOfWeekLineComparison()" style="width: 30%;">Pizza by Day vs. Average</button>
+            <br />
+            <button class="button" onclick="return OpenPizzaByHourLine(true);" style="width: 30%;">Pizzas By Hour</button>
+            <button class="button" onclick="return OpenPizzaByHourLine(false)" style="width: 30%;">Pizzas By Hour All Halls</button>
+            <button class="button" onclick="return OpenPizzaByHourLineComparison();" style="width: 30%;">Pizzas by Hour vs. Average</button>
+            <br />
+            <br />
+            <button class="button" onclick="return OpenPackageByDayOfWeekLine(true);" style="width: 30%;">Packages by Day</button>
+            <button class="button" onclick="return OpenPackageByDayOfWeekLine(false);" style="width: 30%;">Packages by Day All Halls</button>
+            <button class="button" onclick="return OpenPackageByDayOfWeekLineComparison();" style="width: 30%;">Packages by Day vs Avg</button>
+            <br />
+            <button class="button" onclick="return OpenPackageByHourLine(true);" style="width: 30%;">Packages by Hour</button>
+            <button class="button" onclick="return OpenPackageByHourLine(false);" style="width: 30%;">Packages by Hour All Halls</button>
+            <button class="button" onclick="return OpenPackageByHourLineComparison();" style="width: 30%;">Packages by Hour vs Avg</button>
+            <br />
+            <br />
+            <button class="button" onclick="return OpenProductByDayOfWeekLine(true);" style="width: 30%;">Products by Day</button>
+            <button class="button" onclick="return OpenProductByDayOfWeekLine(false);" style="width: 30%;">Products by Day All Halls</button>
+            <br />
+            <button class="button" onclick="return OpenProductByHourLine(true);" style="width: 30%;">Products by Hour</button>
+            <button class="button" onclick="return OpenProductByHourLine(false);" style="width: 30%;">Products by Hour All Halls</button>
+        </div>
+    </form>
+</asp:Content>

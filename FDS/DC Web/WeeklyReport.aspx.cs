@@ -1,0 +1,468 @@
+﻿using FDS;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System;
+using System.Data;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class WeeklyReport : System.Web.UI.Page
+{
+    private float TotalPizza;
+    private float TotalProduct;
+    private float Credits;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Request.Params["Report"] == null)
+        {
+            Response.Redirect("Reports.aspx");
+        }
+
+        int ReportID = 0;
+        int HallID = 0;
+
+        sqlWeeklyReportsPizza.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+
+        sqlWeeklyReportsPizzaCredits.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+
+        sqlWeeklyReportsProducts.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+
+        if (!IsPostBack)
+        {
+            ReportID = (int.Parse(Request.Params["Report"]));
+            HallID = (int.Parse(Session["Hall"].ToString()));
+
+            DateTime StartDate = FDS.Report.getStartDate(ReportID);
+            DateTime EndDate = FDS.Report.getEndDate(ReportID);
+
+            lblDate.Text = StartDate.ToShortDateString() + " - " + EndDate.ToShortDateString();
+
+            var CurrentHall = Hall.GetHallById(int.Parse(String.Format("{0}", Session["hall"])));
+            lblHall.Text = CurrentHall == null ? "no" : CurrentHall.Name + " Hall";
+
+            CalculateTotals();
+        }
+    }
+
+    public void CalculateTotals()
+    {
+        foreach (GridViewRow row in gvWeeklyReportsPizza.Rows)
+        {
+            if (row.RowType == DataControlRowType.DataRow)
+            {
+                int rowIndex = row.RowIndex;
+
+                var Cost = float.Parse(gvWeeklyReportsPizza.Rows[rowIndex].Cells[4].Text.Trim().ToString().TrimStart('$'));
+                var Amount = int.Parse(gvWeeklyReportsPizza.Rows[rowIndex].Cells[3].Text.Trim().ToString());
+
+                TotalPizza += (Cost * Amount);
+            }
+        }
+
+        foreach (GridViewRow row in gvWeeklyReportsProduct.Rows)
+        {
+            if (row.RowType == DataControlRowType.DataRow)
+            {
+                int rowIndex = row.RowIndex;
+
+                var Cost = float.Parse(gvWeeklyReportsProduct.Rows[rowIndex].Cells[3].Text.Trim().ToString().TrimStart('$'));
+                var Amount = int.Parse(gvWeeklyReportsProduct.Rows[rowIndex].Cells[2].Text.Trim().ToString());
+
+                TotalProduct += (Cost * Amount);
+            }
+        }
+
+        foreach (GridViewRow row in GVPizzaCredits.Rows)
+        {
+            if (row.RowType == DataControlRowType.DataRow)
+            {
+                int rowIndex = row.RowIndex;
+
+                var Cost = float.Parse(GVPizzaCredits.Rows[rowIndex].Cells[4].Text.Trim().ToString().TrimStart('$'));
+                var Amount = int.Parse(GVPizzaCredits.Rows[rowIndex].Cells[3].Text.Trim().ToString());
+
+                Credits += (Cost * Amount);
+            }
+        }
+
+        lblProductRev.Text = TotalProduct.ToString("C2");
+        lblPizzaRev.Text = TotalPizza.ToString("C2");
+        lblTotalRev.Text = (TotalPizza + TotalProduct).ToString("C2");
+        lblCredits.Text = Credits.ToString("C2");
+    }
+
+    public static decimal Amount(decimal price, int amt)
+    {
+        return price * amt;
+    }
+
+    protected void btnExport_Click(object sender, EventArgs e)
+    {
+        if (txtNetDeposit.Text.Trim().Equals("") || txtNetDeposit.Text == null)
+        {
+            Session["error"] = "Please Provide A Net Deposit.";
+            Response.Redirect(Request.RawUrl);
+        }
+        else
+        {
+            ExportToPDF(gvWeeklyReportsPizza, gvWeeklyReportsProduct, false);
+        }
+    }
+
+    //PDF Export for weekly accountable reports
+    protected void ExportToPDF(GridView gvPizza, GridView gvProduct, bool LandScape)
+    {
+        #region Default
+
+        float HeaderTextSize = 9;
+        float ReportNameSize = 16;
+        float ReportTextSize = 10;
+        float ApplicationNameSize = 12;
+
+        // Creates a PDF document
+
+        Document document = null;
+        if (LandScape == true)
+        {
+            // Sets the document to A4 size and rotates it so that the     orientation of the page is Landscape.
+            document = new Document(PageSize.A4.Rotate(), 0, 0, 15, 5);
+        }
+        else
+        {
+            document = new Document(PageSize.A4, 0, 0, 15, 5);
+        }
+
+        #endregion Default
+
+        #region HeaderTable
+
+        iTextSharp.text.pdf.PdfPTable HeaderTable = new iTextSharp.text.pdf.PdfPTable(3);
+
+        // Creates a phrase for a new line.
+        Phrase phHeaderSpaces = new Phrase("");
+        PdfPCell clHeaderSpaces = new PdfPCell(phHeaderSpaces);
+        clHeaderSpaces.Border = PdfPCell.NO_BORDER;
+        clHeaderSpaces.Colspan = 0;
+
+        #region PICTURE
+
+        iTextSharp.text.Image sig = iTextSharp.text.Image.GetInstance(HttpContext.Current.Server.MapPath("~/Assets/Images/ORL_Logo.png"));
+        sig.ScaleToFit(300, 200);
+        PdfPCell pic = new PdfPCell(sig);
+        pic.Border = PdfPCell.NO_BORDER;
+        pic.HorizontalAlignment = Element.ALIGN_LEFT;
+
+        Phrase empty = new Phrase("\n", FontFactory.GetFont("Arial", ApplicationNameSize, iTextSharp.text.Font.NORMAL));
+        PdfPCell clempty = new PdfPCell(empty);
+        clempty.HorizontalAlignment = Element.ALIGN_RIGHT;
+        clempty.Border = PdfPCell.NO_BORDER;
+
+        HeaderTable.AddCell(pic);
+        HeaderTable.AddCell(clempty);
+        HeaderTable.AddCell(clHeaderSpaces);
+        HeaderTable.AddCell(clHeaderSpaces);
+        HeaderTable.AddCell(clempty);
+        HeaderTable.AddCell(clempty);
+
+        #endregion PICTURE
+
+        HeaderTable.AddCell("");
+        HeaderTable.AddCell("");
+        HeaderTable.AddCell("");
+
+        // Creates a phrase to hold the application name at the left hand side of the header.
+        Phrase phApplicationName = new Phrase("Weekly Accountable Report: " + lblHall.Text, FontFactory.GetFont("Arial", ApplicationNameSize, iTextSharp.text.Font.NORMAL));
+        PdfPCell clApplicationName = new PdfPCell(phApplicationName);
+        clApplicationName.Border = PdfPCell.NO_BORDER;
+        clApplicationName.HorizontalAlignment = Element.ALIGN_LEFT;
+
+        HeaderTable.AddCell(clApplicationName);
+        HeaderTable.AddCell(clempty);
+
+        // Creates a phrase to show the current date at the right hand side of the header.
+        Phrase phDate = new Phrase(lblDate.Text.ToString(), FontFactory.GetFont("Arial", ApplicationNameSize, iTextSharp.text.Font.NORMAL));
+        PdfPCell clDate = new PdfPCell(phDate);
+        clDate.HorizontalAlignment = Element.ALIGN_RIGHT;
+        clDate.Border = PdfPCell.NO_BORDER;
+
+        HeaderTable.AddCell(clDate);
+
+        // Sets the border of the headerTable to zero.
+        HeaderTable.DefaultCell.Border = PdfPCell.NO_BORDER;
+
+        // Creates a phrase for a new line.
+        Phrase phHeadStats = new Phrase("\n");
+        PdfPCell clHeadStats = new PdfPCell(phHeadStats);
+        clHeadStats.Border = PdfPCell.NO_BORDER;
+        clHeadStats.Colspan = 3;
+        HeaderTable.AddCell(clHeadStats);
+
+        #endregion HeaderTable
+
+        #region PizzaTable
+
+        //PIZZA TABLE------------------------------------------------------------------------------------------------------------
+        int noOfColumnsPizza = 0, noOfRowsPizza = 0;
+        DataTable tblPizza = null;
+
+        if (gvProduct.AutoGenerateColumns)
+        {
+            tblPizza = gvWeeklyReportsPizza.DataSource as DataTable; // Gets the DataSource of the GridView Control.
+            noOfColumnsPizza = tblPizza.Columns.Count;
+            noOfRowsPizza = tblPizza.Rows.Count;
+        }
+        else
+        {
+            noOfColumnsPizza = gvWeeklyReportsPizza.Columns.Count;
+            noOfRowsPizza = gvWeeklyReportsPizza.Rows.Count;
+        }
+
+        // Creates a PdfPTable with column count of the table equal to no of columns of the gridview or gridview datasource.
+        iTextSharp.text.pdf.PdfPTable PizzaTable = new iTextSharp.text.pdf.PdfPTable(noOfColumnsPizza);
+
+        // Creates a phrase which holds the file name.
+        Phrase phHeaderPizza = new Phrase("Pizzas", FontFactory.GetFont("Arial", ReportNameSize, iTextSharp.text.Font.BOLD));
+        PdfPCell clHeaderPizza = new PdfPCell(phHeaderPizza);
+        clHeaderPizza.Colspan = noOfColumnsPizza;
+        clHeaderPizza.Border = PdfPCell.NO_BORDER;
+        clHeaderPizza.HorizontalAlignment = Element.ALIGN_CENTER;
+        PizzaTable.AddCell(clHeaderPizza);
+
+        // Sets the gridview column names as table headers.
+        for (int i = 0; i < noOfColumnsPizza; i++)
+        {
+            Phrase ph = null;
+
+            if (gvWeeklyReportsPizza.AutoGenerateColumns)
+            {
+                ph = new Phrase(tblPizza.Columns[i].ColumnName, FontFactory.GetFont("Arial", HeaderTextSize, iTextSharp.text.Font.BOLD));
+            }
+            else
+            {
+                ph = new Phrase(gvWeeklyReportsPizza.Columns[i].HeaderText, FontFactory.GetFont("Arial", HeaderTextSize, iTextSharp.text.Font.BOLD));
+            }
+
+            PizzaTable.AddCell(ph);
+        }
+
+        // Reads the gridview rows and adds them to the mainTable
+        for (int rowNo = 0; rowNo < noOfRowsPizza; rowNo++)
+        {
+            for (int columnNo = 0; columnNo < noOfColumnsPizza; columnNo++)
+            {
+                if (gvWeeklyReportsPizza.AutoGenerateColumns)
+                {
+                    string s = gvWeeklyReportsPizza.Rows[rowNo].Cells[columnNo].Text.Trim();
+                    s = s.Replace("&quot;", "\"");
+                    s = s.Replace("&amp;", "&");
+                    Phrase ph = new Phrase(s, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+                    PizzaTable.AddCell(ph);
+                }
+                else
+                {
+                    if (gvWeeklyReportsPizza.Columns[columnNo] is TemplateField)
+                    {
+                        DataBoundLiteralControl lc = gvWeeklyReportsPizza.Rows[rowNo].Cells[columnNo].Controls[0] as DataBoundLiteralControl;
+                        string s = lc.Text.Trim();
+                        s = s.Replace("&quot;", "\"");
+                        s = s.Replace("&amp;", "&");
+                        Phrase ph = new Phrase(s, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+                        PizzaTable.AddCell(ph);
+                    }
+                    else
+                    {
+                        string s = gvWeeklyReportsPizza.Rows[rowNo].Cells[columnNo].Text.Trim();
+                        s = s.Replace("&quot;", "\"");
+                        s = s.Replace("&amp;", "&");
+                        Phrase ph = new Phrase(s, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+                        PizzaTable.AddCell(ph);
+                    }
+                }
+            }
+
+            // Tells the mainTable to complete the row even if any cell is left incomplete.
+            PizzaTable.CompleteRow();
+        }
+
+        // Creates a phrase for a new line.
+        Phrase phSpacePizza = new Phrase("\n");
+        PdfPCell clSpacePizza = new PdfPCell(phSpacePizza);
+        clSpacePizza.Border = PdfPCell.NO_BORDER;
+        clSpacePizza.Colspan = noOfColumnsPizza;
+        PizzaTable.AddCell(clSpacePizza);
+
+        #endregion PizzaTable
+
+        #region ProductTable
+
+        //PRODUCTS TABLE------------------------------------------------------------------------------------------------------------
+        int noOfColumnsProd = 0, noOfRowsProd = 0;
+        DataTable tblProd = null;
+
+        if (gvProduct.AutoGenerateColumns)
+        {
+            tblProd = gvProduct.DataSource as DataTable; // Gets the DataSource of the GridView Control.
+            noOfColumnsProd = tblProd.Columns.Count;
+            noOfRowsProd = tblProd.Rows.Count;
+        }
+        else
+        {
+            noOfColumnsProd = gvProduct.Columns.Count;
+            noOfRowsProd = gvProduct.Rows.Count;
+        }
+
+        // Creates a PdfPTable with column count of the table equal to no of columns of the gridview or gridview datasource.
+        iTextSharp.text.pdf.PdfPTable ProductTable = new iTextSharp.text.pdf.PdfPTable(noOfColumnsProd);
+
+        // Creates a phrase which holds the file name.
+        Phrase phHeaderProd = new Phrase("Products", FontFactory.GetFont("Arial", ReportNameSize, iTextSharp.text.Font.BOLD));
+        PdfPCell clHeaderProd = new PdfPCell(phHeaderProd);
+        clHeaderProd.Colspan = noOfColumnsProd;
+        clHeaderProd.Border = PdfPCell.NO_BORDER;
+        clHeaderProd.HorizontalAlignment = Element.ALIGN_CENTER;
+        ProductTable.AddCell(clHeaderProd);
+
+        // Sets the gridview column names as table headers.
+        for (int i = 0; i < noOfColumnsProd; i++)
+        {
+            Phrase ph = null;
+
+            if (gvProduct.AutoGenerateColumns)
+            {
+                ph = new Phrase(tblProd.Columns[i].ColumnName, FontFactory.GetFont("Arial", HeaderTextSize, iTextSharp.text.Font.BOLD));
+            }
+            else
+            {
+                ph = new Phrase(gvProduct.Columns[i].HeaderText, FontFactory.GetFont("Arial", HeaderTextSize, iTextSharp.text.Font.BOLD));
+            }
+
+            ProductTable.AddCell(ph);
+        }
+
+        // Reads the gridview rows and adds them to the mainTable
+        for (int rowNo = 0; rowNo < noOfRowsProd; rowNo++)
+        {
+            for (int columnNo = 0; columnNo < noOfColumnsProd; columnNo++)
+            {
+                if (gvProduct.AutoGenerateColumns)
+                {
+                    string s = gvProduct.Rows[rowNo].Cells[columnNo].Text.Trim();
+                    Phrase ph = new Phrase(s, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+                    ProductTable.AddCell(ph);
+                }
+                else
+                {
+                    if (gvProduct.Columns[columnNo] is TemplateField)
+                    {
+                        DataBoundLiteralControl lc = gvProduct.Rows[rowNo].Cells[columnNo].Controls[0] as DataBoundLiteralControl;
+                        string s = lc.Text.Trim();
+                        Phrase ph = new Phrase(s, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+                        ProductTable.AddCell(ph);
+                    }
+                    else
+                    {
+                        string s = gvProduct.Rows[rowNo].Cells[columnNo].Text.Trim();
+                        Phrase ph = new Phrase(s, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+                        ProductTable.AddCell(ph);
+                    }
+                }
+            }
+
+            // Tells the mainTable to complete the row even if any cell is left incomplete.
+            ProductTable.CompleteRow();
+        }
+
+        // Creates a phrase for a new line.
+        Phrase phSpaceProd = new Phrase("\n");
+        PdfPCell clSpaceProd = new PdfPCell(phSpaceProd);
+        clSpaceProd.Border = PdfPCell.NO_BORDER;
+        clSpaceProd.Colspan = noOfColumnsProd;
+        ProductTable.AddCell(clSpaceProd);
+
+        #endregion ProductTable
+
+        #region StatsTable
+
+        iTextSharp.text.pdf.PdfPTable StatsTable = new iTextSharp.text.pdf.PdfPTable(3);
+
+        // Creates a phrase which holds the file name.
+        Phrase phHeaderStats = new Phrase("Totals", FontFactory.GetFont("Arial", ReportNameSize, iTextSharp.text.Font.BOLD));
+        PdfPCell clHeaderStats = new PdfPCell(phHeaderStats);
+        clHeaderStats.Colspan = noOfColumnsProd;
+        clHeaderStats.Border = PdfPCell.NO_BORDER;
+        clHeaderStats.HorizontalAlignment = Element.ALIGN_RIGHT;
+        StatsTable.AddCell(clHeaderStats);
+
+        // Creates a phrase for a new line.
+        Phrase phSpaces = new Phrase("");
+        PdfPCell clSpaces = new PdfPCell(phSpaces);
+        clSpaces.Border = PdfPCell.NO_BORDER;
+        clSpaces.Colspan = 0;
+
+        Phrase Stat;
+
+        StatsTable.AddCell(clSpaces);
+
+        Stat = new Phrase("Pizza", FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+        Stat = new Phrase(lblPizzaRev.Text, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+
+        StatsTable.AddCell(clSpaces);
+        Stat = new Phrase("Products", FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+        Stat = new Phrase(lblProductRev.Text, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+
+        StatsTable.AddCell(clSpaces);
+        Stat = new Phrase("Total Revenue", FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+        Stat = new Phrase(lblTotalRev.Text, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+
+        StatsTable.AddCell(clSpaces);
+        Stat = new Phrase("Credits", FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+        Stat = new Phrase(lblCredits.Text, FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+
+        StatsTable.AddCell(clSpaces);
+        Stat = new Phrase("Net Deposit", FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+        Stat = new Phrase(String.Format("{0:C}", decimal.Parse(txtNetDeposit.Text)), FontFactory.GetFont("Arial", ReportTextSize, iTextSharp.text.Font.NORMAL));
+        StatsTable.AddCell(Stat);
+
+        // Creates a phrase for a new line.
+        Phrase phSpaceStats = new Phrase("\n");
+        PdfPCell clSpaceStats = new PdfPCell(phSpaceStats);
+        clSpaceStats.Border = PdfPCell.NO_BORDER;
+        clSpaceStats.Colspan = noOfColumnsProd;
+        StatsTable.AddCell(clSpaceStats);
+
+        #endregion StatsTable
+
+        // Gets the instance of the document created and writes it to the output stream of the Response object.
+        PdfWriter.GetInstance(document, Response.OutputStream);
+
+        //Sets Size of Tables
+        PizzaTable.SetWidths(new int[] { 3, 3, 2, 4, 4, 4 });
+        ProductTable.SetWidths(new int[] { 6, 2, 4, 4, 4 });
+        StatsTable.SetWidths(new int[] { 12, 4, 4 });
+
+        // Opens the document.
+        document.Open();
+        // Adds the mainTable to the document.
+        document.Add(HeaderTable);
+        document.Add(PizzaTable);
+        document.Add(ProductTable);
+        document.Add(StatsTable);
+        // Closes the document.
+        document.Close();
+
+        Response.ContentType = "application/pdf";
+        Response.AddHeader("content-disposition", "attachment; filename= WeeklyAccountableReport.pdf");
+        Response.End();
+    }
+}

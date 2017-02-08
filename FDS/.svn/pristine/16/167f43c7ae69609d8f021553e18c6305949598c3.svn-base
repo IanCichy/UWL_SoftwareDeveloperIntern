@@ -1,0 +1,667 @@
+﻿#region
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Runtime.InteropServices;
+
+#endregion
+
+namespace FDS
+{
+    public class Employee
+    {
+        public String EagleId;
+        public List<Hall> EmployedBy;
+        private int _employeeId;
+
+        #region Private Methods
+
+        private Employee()
+        {
+            EmployedBy = new List<Hall>();
+            EagleId = "";
+            _employeeId = 0;
+        }
+
+        [DllImport("advapi32.dll")]
+        private static extern bool LogonUser(string username, string domain, string password, int logonType,
+            int logonProvider, out IntPtr phToken);
+
+        /// <summary>
+        /// Finds the employee id of the employee given by their Eagle ID. Returns -1 if there is no
+        /// such employee.
+        /// </summary>
+        /// <param name="eagleId">Eagle ID of employee</param>
+        /// <returns>Employee ID of given employee, -1 if no such employee</returns>
+        private static int GetEmployeeIdByEagleId(String eagleId)
+        {
+            // Create a new command
+            var command = new SqlCommand("SELECT * FROM Employees WHERE eagleID LIKE @EagleID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("EagleID", eagleId));
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Read the results and return the first employee id if there is one
+            if (reader.Read())
+            {
+                var employeeId = int.Parse(String.Format("{0}", reader["employeeID"]));
+                reader.Close();
+                command.Connection.Close();
+                return employeeId;
+            }
+            // if there is no result, return -1
+            reader.Close();
+            command.Connection.Close();
+            return -1;
+        }
+
+        /// <summary>
+        /// Gets all halls that employ the given employee
+        /// </summary>
+        /// <param name="employeeId">Employee's id</param>
+        /// <returns>List of Halls that employ the given employee</returns>
+        public static List<Hall> GetEmployingHalls(int employeeId)
+        {
+            var allHalls = Hall.GetAllHalls();
+            var hallIds = new HashSet<int>();
+
+            // Create a new command to get all halls employing an employee
+            var command = new SqlCommand("SELECT * FROM Employs WHERE employeeID = @EmployeeID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("EmployeeID", employeeId));
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Read the results and keep track of which hall IDs are employers
+            while (reader.Read())
+            {
+                var hallId = int.Parse(String.Format("{0}", reader["hallID"]));
+                hallIds.Add(hallId);
+            }
+
+            // Close connections
+            reader.Close();
+            command.Connection.Close();
+
+            // Select only the halls present in hallIds
+            var halls =
+                from hall in allHalls
+                where hallIds.Contains(hall.HallId)
+                select hall;
+
+            return halls.ToList();
+        }
+
+        #endregion
+
+        #region Public Static Methods
+
+        public static bool IsValidCredentials(string username, string password)
+        {
+            IntPtr hToken;
+            return LogonUser(username, "eagle", password, 3, 0, out hToken)
+            ;
+        }
+
+        /// <summary>
+        /// Finds an employee by their EagleID
+        /// </summary>
+        /// <param name="eagleId">EagleID of employee to find</param>
+        /// <returns>Employee found by EagleID, null if none found</returns>
+        public static Employee GetEmployeeByEagleId(String eagleId)
+        {
+            // Create a new employee object and set the eagleID to the given eagleID and find the
+            // employeeID in the database
+            var e = new Employee { EagleId = eagleId, _employeeId = GetEmployeeIdByEagleId(eagleId) };
+
+            // If employee does not exist, return null
+            if (e._employeeId == -1)
+            {
+                return null;
+            }
+
+            // Add the halls that employ the employee to employedBy
+            e.EmployedBy = GetEmployingHalls(e._employeeId);
+
+            return e;
+        }
+
+        /// <summary>
+        /// Returns the employee corresponding to the given Employee Id
+        /// </summary>
+        /// <param name="employeeId">Employee ID of employee to find</param>
+        /// <returns>Employee with corresponding Employee ID</returns>
+        public static Employee GetEmployeeByEmployeeId(int employeeId)
+        {
+            // Create a new command that gets employees of given employeeID
+            var command = new SqlCommand("SELECT * FROM Employees WHERE employeeID=@employeeID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("employeeID", employeeId));
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Read the results and return them
+            if (reader.Read())
+            {
+                var e = new Employee
+                {
+                    _employeeId = int.Parse(String.Format("{0}", reader["employeeID"])),
+                    EagleId = String.Format("{0}", reader["eagleID"])
+                };
+                e.EmployedBy = GetEmployingHalls(e._employeeId);
+                reader.Close();
+                command.Connection.Close();
+                return e;
+            }
+
+            // if no results, return null and close connections
+            reader.Close();
+            command.Connection.Close();
+            return null;
+        }
+
+        /// <summary>
+        /// Add a new employee
+        /// </summary>
+        /// <param name="eagleId">EagleID of employee to add</param>
+        /// <returns>The employee added if successful, null if not</returns>
+        public static Employee AddNewEmployee(String eagleId)
+        {
+            // Check if employee already exists
+            var existingEmployee = GetEmployeeByEagleId(eagleId);
+            if (existingEmployee != null)
+            {
+                // employee already exists, do nothing
+                return existingEmployee;
+            }
+
+            // Create a new insert command
+            var command = new SqlCommand("INSERT INTO Employees VALUES (@EagleID)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("EagleID", eagleId));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            return GetEmployeeByEagleId(eagleId);
+        }
+
+        /// <summary>
+        /// Gets all employees
+        /// </summary>
+        /// <returns>List of all employees</returns>
+        public static List<Employee> GetAllEmployees()
+        {
+            // Create a list to hold the employees
+            var employees = new List<Employee>();
+
+            // Create a new command that gets the entire Halls table
+            var command = new SqlCommand("SELECT * FROM Employees")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Read the results and put them in the hall list
+            while (reader.Read())
+            {
+                var e = new Employee
+                {
+                    _employeeId = int.Parse(String.Format("{0}", reader["employeeID"])),
+                    EagleId = String.Format("{0}", reader["eagleID"])
+                };
+                e.EmployedBy = GetEmployingHalls(e._employeeId);
+                employees.Add(e);
+            }
+
+            reader.Close();
+            command.Connection.Close();
+
+            // Return the list of the halls
+            return employees;
+        }
+
+        /// <summary>
+        /// Get all employees employed by the given hall
+        /// </summary>
+        /// <param name="hall">Hall to find employees of</param>
+        /// <returns>List of employees employed by given hall</returns>
+        public static List<Employee> GetEmployeesOfHall(Hall hall)
+        {
+            // Create a list to hold the employees
+            var employees = new List<Employee>();
+
+            // Create a new command that runs the dbo.GetEmployeesOfHall function
+            var command = new SqlCommand("SELECT * FROM dbo.GetEmployeesOfHall (@HallID)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("HallID", hall.HallId));
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Read the results and put them in the hall list
+            while (reader.Read())
+            {
+                var e = new Employee
+                {
+                    _employeeId = int.Parse(String.Format("{0}", reader["employeeID"])),
+                    EagleId = String.Format("{0}", reader["eagleID"])
+                };
+                e.EmployedBy = GetEmployingHalls(e._employeeId);
+                employees.Add(e);
+            }
+
+            reader.Close();
+            command.Connection.Close();
+
+            // Return the list of the halls
+            return employees;
+        }
+
+        /// <summary>
+        /// Gets a list of the DCs of a hall
+        /// </summary>
+        /// <param name="hall">Hall to find DCs of</param>
+        /// <returns>List of all DCs of given hall</returns>
+        public static List<Employee> GetDCsOfHall(Hall hall)
+        {
+            // Create a list to hold the dcs
+            var dcs = new List<Employee>();
+
+            // Create a new command that runs the dbo.GetEmployeesOfHall function
+            var command = new SqlCommand("SELECT * FROM dbo.GetDCsOfHall (@HallID)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("HallID", hall.HallId));
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Read the results and put them in the hall list
+            while (reader.Read())
+            {
+                var e = new Employee
+                {
+                    _employeeId = int.Parse(String.Format("{0}", reader["employeeID"])),
+                    EagleId = String.Format("{0}", reader["eagleID"])
+                };
+                e.EmployedBy = GetEmployingHalls(e._employeeId);
+                dcs.Add(e);
+            }
+
+            reader.Close();
+            command.Connection.Close();
+
+            // Return the list of the halls
+            return dcs;
+        }
+
+        //OLD METHOD NOT USED?
+        public static int GetHallByEagleID(String EagleID)
+        {
+            // Set up update command
+            var command =
+                new SqlCommand("SELECT hallID from Employs where employeeID=@EagleID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+
+            command.Parameters.Add(new SqlParameter("EagleID", EagleID));
+
+            // Execute command
+            command.Connection.Open();
+            int hall = int.Parse(command.ExecuteScalar().ToString());
+            command.Connection.Close();
+
+            return hall;
+        }
+
+        public static int GetHallByComputerName(String CompName)
+        {
+            // Set up update command
+            var command =
+                new SqlCommand("SELECT HallID from ComputerNames where FrontDeskComputerName=@CompName")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+
+            command.Parameters.Add(new SqlParameter("CompName", CompName));
+
+            // Execute command
+            command.Connection.Open();
+            int hall = int.Parse(command.ExecuteScalar().ToString());
+            command.Connection.Close();
+
+            return hall;
+        }
+
+        public static int GetOldHallID_FromNew(int HallID)
+        {
+            // Set up update command
+            var command =
+                new SqlCommand("SELECT RSID from Halls where hallID=@HallID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+
+            command.Parameters.Add(new SqlParameter("HallID", HallID));
+
+            // Execute command
+            command.Connection.Open();
+            int hall = int.Parse(command.ExecuteScalar().ToString());
+            command.Connection.Close();
+
+            return hall;
+        }
+
+        public static String GetNetID(String EmployeeID)
+        {
+            // Set up update command
+            var command =
+                new SqlCommand("SELECT eagleID from Employees where employeeID=@EmployeeID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+
+            command.Parameters.Add(new SqlParameter("EmployeeID", EmployeeID));
+
+            // Execute command
+            command.Connection.Open();
+            String eagleID = command.ExecuteScalar().ToString();
+            command.Connection.Close();
+
+            return eagleID;
+        }
+
+        public static Boolean getIfDC(int EmployeeID, int HallId)
+        {
+            // Set up update command
+            var command =
+                new SqlCommand("SELECT TOP 1 isDC from Employs where employeeID=@EmployeeID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+
+            command.Parameters.Add(new SqlParameter("EmployeeID", EmployeeID));
+            command.Parameters.Add(new SqlParameter("HallId", HallId));
+
+            // Execute command
+            command.Connection.Open();
+            Boolean isDC = Boolean.Parse(command.ExecuteScalar().ToString());
+            command.Connection.Close();
+
+            return isDC;
+        }
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// Returns the employee ID of the current employee
+        /// </summary>
+        /// <returns>Employee ID (int)</returns>
+        public int GetEmployeeId()
+        {
+            return _employeeId;
+        }
+
+        /// <summary>
+        /// Checks if employee is employed by a given hall
+        /// </summary>
+        /// <param name="hall">Hall to check if employee is employed by</param>
+        /// <returns>True if employed by hall, false otherwise</returns>
+        public bool IsEmployedByHall(Hall hall)
+        {
+            return EmployedBy.Any(h => h.HallId == hall.HallId);
+        }
+
+        /// <summary>
+        /// Check if this employee is a DC of a given hall
+        /// </summary>
+        /// <param name="hall">Hall to check DC status of</param>
+        /// <returns>True if employee is DC of hall, false otherwise</returns>
+        public bool IsDCOfHall(Hall hall)
+        {
+            return GetDCsOfHall(hall).Any(employee => employee._employeeId == _employeeId);
+        }
+
+        /// <summary>
+        /// Gets a list of all
+        /// </summary>
+        /// <returns>List of Halls where this employee is a DC of</returns>
+        public List<Hall> GetDCOfHalls()
+        {
+            var halls =
+                from h in EmployedBy
+                where IsDCOfHall(h)
+                select h;
+
+            return halls.ToList();
+        }
+
+        /// <summary>
+        /// Adds the employee to the hall
+        /// </summary>
+        /// <param name="hall">Hall to employ employee</param>
+        public void AddEmployeeToHall(Hall hall)
+        {
+            if (IsEmployedByHall(hall))
+            {
+                // already employed by hall, do nothing
+                return;
+            }
+
+            // Create a new command to add employee to hall
+            var command = new SqlCommand("INSERT INTO Employs VALUES (@EmployeeID, @HallID, 0)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("EmployeeID", _employeeId));
+            command.Parameters.Add(new SqlParameter("HallID", hall.HallId));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            // Refresh employedBy to make sure it includes newly added hall
+            EmployedBy = GetEmployingHalls(_employeeId);
+
+            var commands = new SqlCommand("UPDATE Employees SET isWorking=1 WHERE @EmployeeID=EmployeeID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            commands.Parameters.Add(new SqlParameter("EmployeeID", _employeeId));
+            commands.Parameters.Add(new SqlParameter("HallID", hall.HallId));
+
+            // Execute the command
+            commands.Connection.Open();
+            commands.ExecuteNonQuery();
+            commands.Connection.Close();
+        }
+
+        /// <summary>
+        /// Removes employee from hall
+        /// </summary>
+        /// <param name="hall">Hall to remove employee from</param>
+        public void RemoveEmployeeFromHall(Hall hall)
+        {
+            // Create command to remove employee
+            var command = new SqlCommand("DELETE FROM Employs WHERE employeeID = @EmployeeID and hallID = @HallID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("EmployeeID", _employeeId));
+            command.Parameters.Add(new SqlParameter("HallID", hall.HallId));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            EmployedBy = GetEmployingHalls(_employeeId);
+
+            var commands = new SqlCommand("UPDATE Employees SET isWorking=0 WHERE @EmployeeID not in (Select EmployeeID from Employs) and employeeID = @EmployeeID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            commands.Parameters.Add(new SqlParameter("EmployeeID", _employeeId));
+            commands.Parameters.Add(new SqlParameter("HallID", hall.HallId));
+
+            // Execute the command
+            commands.Connection.Open();
+            commands.ExecuteNonQuery();
+            commands.Connection.Close();
+        }
+
+        /// <summary>
+        /// Makes the employee a DC of the given hall
+        /// </summary>
+        /// <param name="hall">Hall to make employee a DC of</param>
+        public void MakeDCOfHall(Hall hall)
+        {
+            // Create a new command
+
+            var command = IsEmployedByHall(hall)
+                ? new SqlCommand("UPDATE Employs SET isDC=1 WHERE employeeID=@EmployeeID and hallID=@HallID")
+                : new SqlCommand("INSERT INTO Employs VALUES (@EmployeeID, @HallID, 1)");
+            command.CommandType = CommandType.Text;
+            command.Connection = Connections.FDSConnection();
+            command.Parameters.Add(new SqlParameter("EmployeeID", _employeeId));
+            command.Parameters.Add(new SqlParameter("HallID", hall.HallId));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            // Refresh employedBy to make sure it includes newly added hall
+            EmployedBy = GetEmployingHalls(_employeeId);
+        }
+
+        /// <summary>
+        /// Removes the employee as a DC of the given hall, but keeps them as an employee
+        /// </summary>
+        /// <param name="hall">Hall to remove DC status of employee</param>
+        public void RemoveDCFromHall(Hall hall)
+        {
+            if (!IsEmployedByHall(hall))
+            {
+                // not employed by hall, do nothing
+                return;
+            }
+
+            // Create a new command to update DC status
+            var command = new SqlCommand("UPDATE Employs SET isDC=0 WHERE employeeID=@EmployeeID and hallID=@HallID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("EmployeeID", _employeeId));
+            command.Parameters.Add(new SqlParameter("HallID", hall.HallId));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            // Refresh employedBy to make sure it includes newly added hall
+            EmployedBy = GetEmployingHalls(_employeeId);
+        }
+
+        /// <summary>
+        /// Completely removes the employee and removes them from all halls they were employed by
+        /// </summary>
+        public void Destroy()
+        {
+            // Create a new command
+            var command =
+                new SqlCommand(
+                    "DELETE FROM Employs WHERE employeeID=@EmployeeID; DELETE FROM Employees WHERE eagleID = @EagleID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("EagleID", EagleId));
+            command.Parameters.Add(new SqlParameter("EmployeeID", _employeeId));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            EagleId = "";
+            _employeeId = -1;
+        }
+
+        /// <summary>
+        /// Determines if this employee is an admin
+        /// </summary>
+        /// <returns><c>true</c> if employee is admin, <c>false</c> otherwise</returns>
+        public bool IsAdmin()
+        {
+            // Set up command
+            var command = new SqlCommand(
+                "SELECT COUNT(*) FROM Admins WHERE employeeID=@employeeID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("employeeID", GetEmployeeId()));
+
+            // Execute command
+            command.Connection.Open();
+            var isAdmin = int.Parse(String.Format("{0}", command.ExecuteScalar())) > 0;
+            command.Connection.Close();
+
+            return isAdmin;
+        }
+
+        #endregion
+    }
+}

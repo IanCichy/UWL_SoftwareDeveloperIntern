@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
+  <asmv1:assemblyIdentity name="Package Manager.exe" version="0.0.1.17" publicKeyToken="ab853a9d35789946" language="neutral" processorArchitecture="msil" type="win32" />
+  <description asmv2:iconFile="icon_512.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
+  <application />
+  <entryPoint>
+    <assemblyIdentity name="Package Manager" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+    <commandLine file="Package Manager.exe" parameters="" />
+  </entryPoint>
+  <trustInfo>
+    <security>
+      <applicationRequestMinimum>
+        <PermissionSet Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          UAC Manifest Options
+          If you want to change the Windows User Account Control level replace the 
+          requestedExecutionLevel node with one of the following.
+
+        <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
+        <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
+        <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
+
+         If you want to utilize File and Registry Virtualization for backward 
+         compatibility then delete the requestedExecutionLevel node.
+    -->
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <dependency>
+    <dependentOS>
+      <osVersionInfo>
+        <os majorVersion="5" minorVersion="1" buildNumber="2600" servicePackMajor="0" />
+      </osVersionInfo>
+    </dependentOS>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="preRequisite" allowDelayedBinding="true">
+      <assemblyIdentity name="Microsoft.Windows.CommonLanguageRuntime" version="4.0.30319.0" />
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="FDM3.exe" size="1046528">
+      <assemblyIdentity name="FDM3" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>zojd89U2ouBlJe8fbn24M8C96K5JCnSu+JfejVT10ps=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="FDS.dll" size="83456">
+      <assemblyIdentity name="FDS" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>R+4WxmJGCGCnplAbp04+ghtG3eS1RbU1QBNE5pwgHn8=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Package Manager.exe" size="430592">
+      <assemblyIdentity name="Package Manager" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>OvdUL+Vk00Tk0Eg3a7Cl5o25HBDzD73nHXUxsa1cKAg=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <file name="icon_512.ico" size="32186">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>SOBrFZjmXioHSI2rKxtxeKzW3lQm8NqPEC1nnzET5CE=</dsig:DigestValue>
+    </hash>
+  </file>
+  <file name="Package Manager.exe.config" size="537">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+      <dsig:DigestValue>6dLdgMgR8Ank1x6fvLNCPrbS5vfvhJWSFBSK7xQM03I=</dsig:DigestValue>
+    </hash>
+  </file>
+<publisherIdentity name="CN=EAGLE\hanrahan.andr" issuerKeyHash="9b2545d1967b47a950bd5512c510e5a7e612c9a4" /><Signature Id="StrongNameSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>/Dd1LRH+jOlhAE8+9r6mxQ2VzJoAfaBLZSBipORNv3A=</DigestValue></Reference></SignedInfo><SignatureValue>gDW4Y1+P9b9h30mDDFiGAoUD9WqhfrWcAuQWBvVj53pI3dvn4xyc2npUe01XooXkHDTgihfnDjlueldizHKiQfx1TEzJw0yYG+pa/Gzd09lYC2nWvofF7hdlrsyhLMx+VvIHA7JNU5aP8nUSvuaeh1WFxU3GQiwcKE8LRpE/rXc=</SignatureValue><KeyInfo Id="StrongNameKeyInfo"><KeyValue><RSAKeyValue><Modulus>skE6fiC1U1MJ2RbxXw1r1+C6Zq1Ld3BK45OTyh6kWxoxarCsWNY0yzcp7RVhKAAnOWWOHEMxMPtcBb3pWQvX157f7JALKs1/wcu5SHDoWOntUEQIofMrSZ40oIq9xhrg3YNhWKqp3pX8lpSHzR3qrofm5A02E86+7Ipw6iLwgx0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><msrel:RelData xmlns:msrel="http://schemas.microsoft.com/windows/rel/2005/reldata"><r:license xmlns:r="urn:mpeg:mpeg21:2003:01-REL-R-NS" xmlns:as="http://schemas.microsoft.com/windows/pki/2005/Authenticode"><r:grant><as:ManifestInformation Hash="70bf4de4a46220654ba07d009acc950dc5a6bef63e4f0061e98cfe112d7537fc" Description="" Url=""><as:assemblyIdentity name="Package Manager.exe" version="0.0.1.17" publicKeyToken="ab853a9d35789946" language="neutral" processorArchitecture="msil" type="win32" /></as:ManifestInformation><as:SignedBy /><as:AuthenticodePublisher><as:X509SubjectName>CN=EAGLE\hanrahan.andr</as:X509SubjectName></as:AuthenticodePublisher></r:grant><r:issuer><Signature Id="AuthenticodeSignature" xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /><SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256" /><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" /><Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" /></Transforms><DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" /><DigestValue>qVJ2PBFugZzL3xycDrNwHCgdUu0htYrJYHv51mr7NsM=</DigestValue></Reference></SignedInfo><SignatureValue>cOW7qF2Khhp/hndLugL6RFOgrGNp49BMuQg6PAc/BOImAtM+Ib/PYMHKPsO/+3IwBFCwqoDbpMgowXuM/hupDPXMssBqZz3TLQhUyF2/pJi19ZNevCsx73jGKDR6l8lZU43nci7fd0+cJJDrxxmnbpAwZQ8BXZjD62rkNFs613c=</SignatureValue><KeyInfo><KeyValue><RSAKeyValue><Modulus>skE6fiC1U1MJ2RbxXw1r1+C6Zq1Ld3BK45OTyh6kWxoxarCsWNY0yzcp7RVhKAAnOWWOHEMxMPtcBb3pWQvX157f7JALKs1/wcu5SHDoWOntUEQIofMrSZ40oIq9xhrg3YNhWKqp3pX8lpSHzR3qrofm5A02E86+7Ipw6iLwgx0=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue></KeyValue><X509Data><X509Certificate>MIIB5TCCAU6gAwIBAgIQGI6mnbS1PpdMiIWytFNfFTANBgkqhkiG9w0BAQsFADAxMS8wLQYDVQQDHiYARQBBAEcATABFAFwAaABhAG4AcgBhAGgAYQBuAC4AYQBuAGQAcjAeFw0xNDExMjExOTU2NDFaFw0xNTExMjIwMTU2NDFaMDExLzAtBgNVBAMeJgBFAEEARwBMAEUAXABoAGEAbgByAGEAaABhAG4ALgBhAG4AZAByMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCyQTp+ILVTUwnZFvFfDWvX4LpmrUt3cErjk5PKHqRbGjFqsKxY1jTLNyntFWEoACc5ZY4cQzEw+1wFvelZC9fXnt/skAsqzX/By7lIcOhY6e1QRAih8ytJnjSgir3GGuDdg2FYqqnelfyWlIfNHequh+bkDTYTzr7sinDqIvCDHQIDAQABMA0GCSqGSIb3DQEBCwUAA4GBAGijT9GemRJQc/pqVqCqJ53qfK2uwHd3Uka9hYrfRJ5wdkHyaleMZPBV+ZA/NOYX1rOVjs8MI/mlrGSPypNp6ZCRJLQVPINS9nvb7wtMhlnMxW2aedHAGp05LypbUVxuiaNxC0O8qsxiVDKliHGOE3PjCMySR1QqceEkQjDuRmqv</X509Certificate></X509Data></KeyInfo></Signature></r:issuer></r:license></msrel:RelData></KeyInfo></Signature></asmv1:assembly>

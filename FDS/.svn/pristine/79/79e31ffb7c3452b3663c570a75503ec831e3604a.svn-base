@@ -1,0 +1,25 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true" CodeFile="Home.aspx.cs" Inherits="Options" %>
+
+<asp:Content ID="ContentHome" runat="server" ContentPlaceHolderID="body">
+    <form id="FormHome" runat="server">
+        <!---------------------Options!---------------->
+        <br /><br />
+        <asp:Button ID="btnAllTaxForm" runat="server" Text="Cashiers Deposit Form" OnClick="btnAllTaxForm_Click" />
+        <br /><br />
+                <asp:Button ID="btnChangeHall" runat="server" Text="Change Hall" OnClick="btnChangeHall_Click" />
+                <br /><br />
+
+        <!---------------------DC Message!---------------->
+        <div>
+            <asp:Label runat="server" ID="lblMOTD" Text="Desk Coordinator Message" />
+            <br />
+            <asp:Label runat="server" ID="lblDateUpdated" Text="Last Updated:" />
+            <br />
+            <asp:TextBox runat="server" ID="txtMOTD" TextMode="Multiline" MaxLength="256" Height="250" Width="500" Style="resize: none;"
+                CssClass="msb" placeholder="Enter A Message To Display For The Front Desk." />
+            <br />
+            <br />
+            <asp:Button ID="btnUpdate" runat="server" Text="Update" OnClick="btnUpdateMOTD_Click" CommandName="Update" />
+        </div>
+    </form>
+</asp:Content>

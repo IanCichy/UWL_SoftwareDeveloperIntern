@@ -1,0 +1,71 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeFile="wiaaMaster.master.cs" Inherits="wiaaMaster" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>State Track Housing</title>
+    <link href="WiaaStyleSheet.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        .bgcell
+        {
+            background-image: url(images/track.gif); /*background-position:center;*/
+            background-repeat: no-repeat;
+        }
+        .style2
+        {
+            height: 22px;
+        }
+        .style3
+        {
+            height: 40px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <table cellspacing="0" cellpadding="0" style="height: 600px" align="center">
+        <tr>
+            <td colspan="3">
+                <a href="http://www.wiaawi.org/">
+                    <img style="border: none" src="Images/WIAA%20Icon.jpg" /></a><img src="images/header.gif"
+                        alt="WIAA" style="margin-top: 4px" />
+            </td>
+        </tr>
+        <tr>
+            <td rowspan="2" style="width: 5%" />
+            <td class="style3" align="center" valign=top>
+                <a href="config.aspx" style="text-decoration: none; border: none">
+                    <img id="imgAdmin" style="border: none; margin-right: -4px" src="Images/admin.jpg" alt="Home" height="49" runat="server" visible="false"/></a>
+                <a href="index.aspx" style="text-decoration: none; border: none">
+                    <img style="border: none" src="Images/wiaa_home.gif" alt="Home" height="49" /></a><a
+                        href="Login.aspx"><img src="Images/log_in.gif" style="border: none" alt="Login" /></a><a
+                            href="food.aspx"><img src="Images/food.gif" style="border: none" alt="Food" /></a><a
+                                href="housing.aspx"><img src="Images/housing.gif" style="border: none" alt="Housing"
+                                    height="49" width="91" /></a><a href="parking.aspx"><img src="Images/Parking.gif"
+                                        style="border: none" alt="Parking" /></a><a href="http://www.uwlax.edu/campus-map/index.htm"  target="_blank"><img
+                                            style="border: none" src="Images/campus_map.gif" alt="Parking"/></a><img src="Images/spacer.gif" />
+            </td>
+            <td rowspan="2" style="width: 5%" />
+        </tr>
+        <tr>
+            <td class="bgcell">
+                &nbsp;<asp:ScriptManager ID="ScriptManager1" runat="server">
+                </asp:ScriptManager>
+                <contenttemplate>
+                        
+                            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server" />
+
+                        </contenttemplate>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <img src="images/newFooter.gif" alt="" style="padding-left: 30px"/>
+            </td>
+        </tr>
+    </table>
+    </form>
+</body>
+&nbsp;
+</html>

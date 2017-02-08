@@ -1,0 +1,49 @@
+/* Last Modified 24-12-2009 by Menuka Walpitagamage */
+body {
+    width: 640px;
+    margin: 0 auto;
+    text-align: center;
+    border: 0px solid #666;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    padding-top: 100px;
+}
+
+#content {
+    padding: 5px 0;
+}
+
+#innerholder h3 span {
+    background: url(../images/intelligentpanda-login.png) no-repeat center top;
+    height: 50px;
+    display: block;
+}
+
+#loginbutton {
+    background: #999;
+    color: #fff;
+    cursor: pointer;
+    padding: 5px 10px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 4px;
+    width: 150px;
+}
+
+input {
+    border: none;
+    background: #fff;
+    width: 250px;
+    font-family: arial, helvetica;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.roundedfield {
+    background: url(../images/rounded.gif) no-repeat center top;
+    height: 50px;
+}
+
+.label {
+    padding-bottom: 5px;
+    text-align: center;
+}

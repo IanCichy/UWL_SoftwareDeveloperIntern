@@ -1,0 +1,132 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Net.Mail;
+using System.Net;
+using System.Data;
+
+/// <summary>
+/// Summary description for Email
+/// </summary>
+public class Email
+{
+    /// <summary>
+    /// Sends a confirmation message upon making a reservation.
+    /// </summary>
+    /// <param name="recipient">Who to send the message to.</param>
+    /// <param name="subject">The subject of the message.</param>
+    /// <param name="messageBody">The body of the message.</param>
+    public static void sendMessage(string recipient, string subject, string messageBody)
+    {
+        string body = "<html>" +
+                            "<h4> Thank you for registering for housing for the 2016 WIAA Track and Field Championship! </h4>" +
+                            "<p>Please review your reservation information below. If you need to make changes to your reservation, you can do so by using the email and password you initially provided when filling out the application here: https://reslife.uwlax.edu/wiaa/login.aspx </p>" +
+                            "<div>" + messageBody + "</div>" +
+                            "<div>If you have any general questions, please contact Residence Life at 608-785-8076 or by email - WIAAHousing@uwlax.edu. <br/>" +
+                            "If you are having technical issues with your application, contact RLIS at 608-789-2300 or by email - rlis@uwlax.edu.</div>" +
+                      "</html>";
+
+        System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+        message.To.Add(recipient);
+        message.Subject = subject;
+        message.From = new System.Net.Mail.MailAddress("WIAAHousing@uwlax.edu");
+        message.IsBodyHtml = true;
+        AlternateView htmlView = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
+        message.AlternateViews.Add(htmlView);
+
+        // The attachments for the email
+        var streamCoachesLetter = new WebClient().OpenRead("http://reslife.uwlax.edu/wiaa/Forms/CoachesLetterHousingPolicies2015.pdf");
+        var streamAgreement = new WebClient().OpenRead("http://reslife.uwlax.edu/wiaa/Forms/HousingAgreementEmergencyContactInfo2015.pdf");
+        var streamCharges = new WebClient().OpenRead("http://reslife.uwlax.edu/wiaa/Forms/HousingDamageLostItemsCharges2015.pdf");
+        var streamRoommates = new WebClient().OpenRead("http://reslife.uwlax.edu/wiaa/Forms/WIAATraditionalHallsRosterForm2015.pdf");
+        var streamEagleRoommates = new WebClient().OpenRead("http://reslife.uwlax.edu/wiaa/Forms/WIAAEagleHallRosterForm2015.pdf");
+        var streamCoachCell = new WebClient().OpenRead("http://reslife.uwlax.edu/wiaa/Forms/CoachesCellNumbers2015.pdf");
+
+        Attachment coachesLetter = new Attachment(streamCoachesLetter, "");
+        coachesLetter.Name = "CoachesLetter.pdf";
+        message.Attachments.Add(coachesLetter);
+
+        Attachment housingAgreement = new Attachment(streamAgreement, "");
+        housingAgreement.Name = "HousingAgreement.pdf";
+        message.Attachments.Add(housingAgreement);
+
+        Attachment housingCharges = new Attachment(streamCharges, "");
+        housingCharges.Name = "HousingCharges.pdf";
+        message.Attachments.Add(housingCharges);
+
+        Attachment roommateListing = new Attachment(streamRoommates, "");
+        roommateListing.Name = "RoommateListing.pdf";
+        message.Attachments.Add(roommateListing);
+
+        Attachment roommateEagleListing = new Attachment(streamEagleRoommates, "");
+        roommateEagleListing.Name = "RoommateListingEagle.pdf";
+        message.Attachments.Add(roommateEagleListing);
+
+        Attachment coachCellListing = new Attachment(streamCoachCell, "");
+        coachCellListing.Name = "CoachCellListing.pdf";
+        message.Attachments.Add(coachCellListing);
+
+        System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient("smtp.gmail.com");
+        smtp.Port = 587;
+        smtp.Credentials = new System.Net.NetworkCredential("WIAAHousing@uwlax.edu", "Housing4WIAA!");
+        smtp.EnableSsl = true;
+        smtp.Send(message);
+    }
+
+    /// <summary>
+    /// Sends a confirmation message upon making a reservation.
+    /// </summary>
+    /// <param name="recipient">Who to send the message to.</param>
+    /// <param name="subject">The subject of the message.</param>
+    /// <param name="messageBody">The body of the message.</param>
+    public static void sendUpdate(string recipient, string subject, string messageBody)
+    {
+        string body = "<html>" +
+                            "<h4> Your reservation has been successfully updated. </h4>" +
+                            "<p>Please review your reservation information below. If you need to make changes to your reservation, you can do so by using the email and password you initially provided when filling out the application here: https://reslife.uwlax.edu/wiaa/login.aspx </p>" +
+                            "<div>" + messageBody + "</div>" +
+                            "<div>If you have any general questions, please contact Residence Life at 608-785-8076 or by email - WIAAHousing@uwlax.edu. <br/>" +
+                            "If you are having technical issues with your application, contact RLIS at 608-789-2300 or by email - rlis@uwlax.edu.</div>" +
+                      "</html>";
+
+        System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+        message.To.Add(recipient);
+        message.Subject = subject;
+        message.From = new System.Net.Mail.MailAddress("WIAAHousing@uwlax.edu");
+        message.IsBodyHtml = true;
+        AlternateView htmlView = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
+        message.AlternateViews.Add(htmlView);
+
+        System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient("smtp.gmail.com");
+        smtp.Port = 587;
+        smtp.Credentials = new System.Net.NetworkCredential("WIAAHousing@uwlax.edu", "Housing4WIAA!");
+        smtp.EnableSsl = true;
+        smtp.Send(message);
+    }
+
+    /// <summary>
+    /// Sends a password reset email with instructions to reset their password.
+    /// </summary>
+    /// <param name="recipient">Who is receiving the email</param>
+    /// <param name="token">The random token to confirm authenticity.</param>
+    public static void resetPassword(string recipient, string token)
+    {
+        int rows = int.Parse(SqlHelper.ExecuteScalar(Settings.WIAAConnection, CommandType.Text, "SELECT count(*) FROM WiaaSchoolReservations WHERE ContactEmail = '" + recipient + "' AND Year = " + Settings.Year + "").ToString());
+        if (rows > 0)
+        {
+            SqlHelper.ExecuteNonQuery(Settings.WIAAConnection, CommandType.Text, "INSERT INTO PasswordReset (Email, Token) VALUES ('" + recipient + "', '" + token + "')");
+            System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+            message.To.Add(recipient);
+            message.Subject = "WIAA Password Reset";
+            message.From = new System.Net.Mail.MailAddress("WIAAHousing@uwlax.edu");
+            string body = String.Format("Please navigate to https://reslife.uwlax.edu/wiaa/reset.aspx?email={0}&token={1} to reset your password.", recipient, token);
+            message.Body = body;
+            System.Net.Mail.SmtpClient smtp = new System.Net.Mail.SmtpClient("smtp.gmail.com");
+            smtp.Port = 587;
+            smtp.Credentials = new System.Net.NetworkCredential("WIAAHousing@uwlax.edu", "Housing4WIAA!");
+            smtp.EnableSsl = true;
+            smtp.Send(message);
+        }
+    }
+}

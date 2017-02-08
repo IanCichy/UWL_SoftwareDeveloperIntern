@@ -1,0 +1,329 @@
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace FDM3
+{
+    public partial class CashIn_Out : Form
+    {
+        private decimal TotalCash;
+        private decimal TotalCashWithCredits;
+        private int ShiftID;
+        private int HallID;
+        private Boolean doubleCount = false, pizzaInventory = false, pizzaErr = false;
+        private decimal lastShiftOut = 0;
+        private Main MainForm;
+
+        public CashIn_Out(int shiftID, int hallID, Main FormMain)
+        {
+            ShiftID = shiftID;
+            HallID = hallID;
+            MainForm = FormMain;
+            InitializeComponent();
+        }
+
+        private void CashIn_Out_Load(object sender, EventArgs e)
+        {
+            //Populates gridview for counting pizzas
+            this.pizzasForHallTableAdapter.Fill(this.frontDeskSuiteDataSet12.PizzasForHall, HallID);
+            this.ControlBox = false;
+            lastShiftOut = FDS.Shift.getLastCashOut(ShiftID, HallID);
+        }
+
+        #region MethodsIn
+
+        /*
+         * Submit cash in and pizza counts and reset controls for later use
+         * when cashing out
+         */
+
+        private void btnPopUpCashIn_Click(object sender, EventArgs e)
+        {
+            //If any pizza counts are off tell user
+            if (checkPizzaCounts())
+            {
+                MessageBox.Show("Please enter counts for all pizzas.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            checkPizzaCountsColor();
+            if (!pizzaInventory)
+            {
+                checkPizzaCountsError();
+                pizzaInventory = true;
+                return;
+            }
+
+            //If cash amounts differ set error
+            if (TotalCash != lastShiftOut)
+            {
+                FDS.Shift.setCashErrorIn(ShiftID);
+            }
+
+            if (chkCountedCash.Checked = true && chkCountedPizza.Checked == true)
+            {
+                DialogResult result = MessageBox.Show("Are you sure you want to submit your pizza counts and cash in?",
+                    "Cash/Pizza", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    FDS.Shift.setCashIn(ShiftID, TotalCash, "Last Shift Out: " + lastShiftOut + " --- Difference: " + (TotalCash - lastShiftOut));
+                    countPizzasIn();
+                    MainForm.lblStartCashDollars.Text = TotalCash.ToString("C2");
+                }
+                else
+                {
+                    return;
+                }
+
+                MainForm.tabCntrlFrontDesk.TabPages[2].Enabled = true;
+                MainForm.tabCntrlFrontDesk.TabPages[3].Enabled = true;
+                MainForm.tabCntrlFrontDesk.TabPages[2].BackColor = Color.White;
+                MainForm.tabCntrlFrontDesk.TabPages[3].BackColor = Color.White;
+
+                btnPopUpCashIn.Visible = false;
+                btnPopUpCashOut.Visible = true;
+                chkCountedCash.Checked = false;
+                chkCountedPizza.Checked = false;
+                pizzaInventory = false;
+
+                numericUpDownNickels.Value = 0;
+                numericUpDownDimes.Value = 0;
+                numericUpDownQuarters.Value = 0;
+                numericUpDownDollars.Value = 0;
+                numericUpDownFives.Value = 0;
+                numericUpDownTens.Value = 0;
+
+                textBoxPizzaCountsOff.Enabled = true;
+
+                foreach (DataGridViewRow Row in DGVPizzaCount.Rows)
+                {
+                    Row.Cells["PizzaCounts"].Value = "";
+                }
+
+                Hide();
+            }
+            else
+            {
+                DialogResult result = MessageBox.Show("Please certify that you have counted cash and pizzas.",
+                "Cash/Pizza", MessageBoxButtons.OK,
+                MessageBoxIcon.Exclamation);
+            }
+        }
+
+        #endregion MethodsIn
+
+        #region MethodsOut
+
+        /*
+         *
+         *
+         */
+
+        private void btnPopUpCashOut_Click(object sender, EventArgs e)
+        {
+            //If any pizza counts are off tell user
+            if (checkPizzaCounts())
+            {
+                MessageBox.Show("Please enter counts for all pizzas.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            checkPizzaCountsColor();
+            if (!pizzaInventory)
+            {
+                checkPizzaCountsError();
+                pizzaInventory = true;
+                return;
+            }
+
+            decimal cashOut = Decimal.Parse(MainForm.lblValueItemsAll.Text.ToString().TrimStart('$')) +
+                              Decimal.Parse(MainForm.lblStartCashDollars.Text.ToString().TrimStart('$'));
+
+            if (TotalCash != cashOut && doubleCount == false)
+            {
+                DialogResult result = MessageBox.Show("Please double count your cash as it differes from the system total.",
+                 "Cash/Pizza", MessageBoxButtons.OK,
+                 MessageBoxIcon.Exclamation);
+                doubleCount = true;
+                return;
+            }
+
+            if (chkCountedCash.Checked == true && chkCountedPizza.Checked == true)
+            {
+                if (TotalCash != cashOut)
+                {
+                    if (textBoxPizzaCountsOff.Text.ToString().Trim().Equals("") || textBoxPizzaCountsOff.Text == null)
+                    {
+                        DialogResult result = MessageBox.Show("Please enter a reason for your cash being off.",
+                         "NotBalanced", MessageBoxButtons.OK,
+                         MessageBoxIcon.Exclamation);
+                        return;
+                    }
+                    FDS.Shift.setCashErrorOut(ShiftID);
+                }
+                FDS.Shift.setCashOut(ShiftID, TotalCash, " ----- \"" + textBoxPizzaCountsOff.Text + "\" ----- " + "\nSystem Cash Out: " +
+                    cashOut + " --- Difference: " + (TotalCash - cashOut));
+                countPizzasOut();
+                FDS.Shift.EndShift(ShiftID);
+                //Exit?
+                Application.Exit();
+            }
+            else
+            {
+                DialogResult result = MessageBox.Show("Please certify that you have counted cash and pizzas.",
+                 "Cash/Pizza", MessageBoxButtons.OK,
+                 MessageBoxIcon.Exclamation);
+            }
+        }
+
+        #endregion MethodsOut
+
+        #region HelperMethods
+
+        /*
+         * Helper Method for CashIn
+         *     Counts pizzas row by row in the gridview
+         */
+
+        private void countPizzasIn()
+        {
+            foreach (DataGridViewRow Row in DGVPizzaCount.Rows)
+            {
+                int pizzaID = int.Parse(Row.Cells["pizzaCountPizzaID"].Value.ToString());
+                int pizzaInventory = int.Parse(Row.Cells["pizzaCountInventory"].Value.ToString());
+                int count = int.Parse(Row.Cells["PizzaCounts"].Value.ToString());
+                FDS.Shift.countPizzaIn(ShiftID, pizzaID, pizzaInventory, count);
+
+                if (pizzaInventory != count && pizzaErr == false)
+                {
+                    pizzaErr = true;
+                    FDS.Shift.setPizzaError(ShiftID);
+                }
+            }
+        }
+
+        /*
+         * Helper Method for CashIn
+         *     Counts pizzas row by row in the gridview
+         */
+
+        private void countPizzasOut()
+        {
+            foreach (DataGridViewRow Row in DGVPizzaCount.Rows)
+            {
+                int pizzaID = int.Parse(Row.Cells["pizzaCountPizzaID"].Value.ToString());
+                int pizzaInventory = int.Parse(Row.Cells["pizzaCountInventory"].Value.ToString());
+                int count = int.Parse(Row.Cells["PizzaCounts"].Value.ToString());
+                FDS.Shift.countPizzaOut(ShiftID, pizzaID, pizzaInventory, count);
+
+                if (pizzaInventory != count && pizzaErr == false)
+                {
+                    pizzaErr = true;
+                    FDS.Shift.setPizzaError(ShiftID);
+                }
+            }
+        }
+
+        /*
+         *Method to refresh pizza gridview for counting pizzas
+         *out at the end of a shift
+         */
+
+        public void CashIn_Out_RefreshPizza()
+        {
+            this.pizzasForHallTableAdapter.Fill(this.frontDeskSuiteDataSet12.PizzasForHall, HallID);
+        }
+
+        /*
+        * Pre: checks to see if all pizzas have a count value
+         * Post: Returns true if yes, else false
+        */
+
+        private Boolean checkPizzaCounts()
+        {
+            Boolean zeroCounts = false;
+            foreach (DataGridViewRow Row in DGVPizzaCount.Rows)
+            {
+                if (Row.Cells["PizzaCounts"].Value != null)
+                {
+                }
+                else
+                {
+                    zeroCounts = true;
+                }
+            }
+            return zeroCounts;
+        }
+
+        /*
+        * Pre: checks to see if all pizzas have a count value
+         * Post: Returns true if yes, else false
+        */
+
+        private void checkPizzaCountsError()
+        {
+            String countOffPizzas = "";
+
+            foreach (DataGridViewRow Row in DGVPizzaCount.Rows)
+            {
+                int pizzaInventory = int.Parse(Row.Cells["pizzaCountInventory"].Value.ToString());
+                int count = int.Parse(Row.Cells["PizzaCounts"].Value.ToString());
+                String name = Row.Cells["pizzaCountName"].Value.ToString();
+                String brand = Row.Cells["pizzaCountBrand"].Value.ToString();
+                checkPizzaCountsColor();
+
+                if (pizzaInventory != count)
+                {
+                    countOffPizzas += brand + " " + name + "\n";
+                }
+            }
+            if (!countOffPizzas.Equals(""))
+            {
+                DialogResult result = MessageBox.Show("Please re-count the following pizza(s): \n" + countOffPizzas,
+                     "Cash/Pizza", MessageBoxButtons.OK,
+                     MessageBoxIcon.Exclamation);
+            }
+        }
+
+        private void checkPizzaCountsColor()
+        {
+            foreach (DataGridViewRow Row in DGVPizzaCount.Rows)
+            {
+                int pizzaInventory = int.Parse(Row.Cells["pizzaCountInventory"].Value.ToString());
+                int count = int.Parse(Row.Cells["PizzaCounts"].Value.ToString());
+
+                if (pizzaInventory != count)
+                {
+                    Row.DefaultCellStyle.BackColor = Color.LightCoral;
+                }
+                else
+                {
+                    Row.DefaultCellStyle.BackColor = Color.White;
+                }
+            }
+        }
+
+        /*
+         *  Auto totals cash field when any of the value boxes are changed
+         */
+
+        private void btnAutoTotalCash_Click(object sender, EventArgs e)
+        {
+            TotalCash = (decimal)((int)numericUpDownNickels.Value * .05 +
+                            (int)numericUpDownDimes.Value * .1 +
+                            (int)numericUpDownQuarters.Value * .25 +
+                            (int)numericUpDownDollars.Value +
+                            (int)numericUpDownFives.Value * 5 +
+                            (int)numericUpDownTens.Value * 10);
+
+            //lblCreditValue.Text = MainForm.lblValueCredits.Text.ToString();
+
+            TotalCashWithCredits = TotalCash + Decimal.Parse(lblCreditValue.Text.ToString().TrimStart('$'));
+
+            lblTotalCash.Text = String.Format("{0:C}", TotalCash);
+            lblTotalCashWithCredits.Text = String.Format("{0:C}", TotalCashWithCredits);
+        }
+
+        #endregion HelperMethods
+    }
+}

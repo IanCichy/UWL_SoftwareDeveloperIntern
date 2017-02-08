@@ -1,0 +1,489 @@
+﻿using System;
+using System.Collections;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Xml.Linq;
+
+public partial class Administrator : System.Web.UI.Page
+{
+    private String hallID;
+    private Boolean hideGlobalData;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["UserInfo"] == null)
+        {
+            Response.Redirect("Login.aspx");
+        }
+        SessionInfo sess = SessionHandler.handleAdminSession(hallID = Request["hallid"].ToString(), "Administrator.aspx", (UserData)Session["UserInfo"]);
+
+        if (!sess.valid)
+        {
+            Response.Redirect("ChooseHall.aspx");
+        }
+        else
+        {
+            hideGlobalData = sess.hideGlobalData;
+        }
+        //UserData data = (UserData)Session["UserInfo"];
+        //hallID = Request["hallid"].ToString();
+        //Boolean hideGlobalData = false;
+
+        //if (data == null) // No session info - get out
+        //{
+        //    Response.Redirect("Login.aspx");
+        //}
+        //else
+        //{
+        //    if (data.hallID == "ALL") // can access any page
+        //    {
+        //        if (hallID == "ALL") // They want to see the global page, show it to them
+        //        {
+        //            hideGlobalData = true; // Dont need interview times for the global page
+        //        }
+        //        else // Want to see another page - check it for validity
+        //        {
+        //            String hallName = DeskDA.getValidHallName(hallID);
+
+        //            if (hallName.Equals("")) // Invalid hall
+        //            {
+        //                Response.Redirect("Administrator.aspx?hallid=ALL");
+        //            }
+
+        //            else
+        //            {
+
+        //            }
+        //        }
+        //    }
+        //    else // Can only access the page in hallID
+        //    {
+        //        if (data.hallID == hallID) // Great, they are on a valid page
+        //        {
+
+        //        }
+        //        else // No, your not allowed to be here - send you to your page
+        //        {
+        //            Response.Redirect("Administrator.aspx?hallid=" + data.hallID);
+        //        }
+        //    }
+        //}
+
+        if (!Page.IsPostBack)
+        {
+            // Questions stuff
+            updateQuestions();
+
+            // Interview Times stuff                        
+            if (!hideGlobalData) // Show to non "ALL" page
+            {
+                updateInterviewTimes();
+            }
+            else
+            {
+                interviewtimesdiv.Visible = false;
+            }
+
+            // Start/end date stuff
+            if (hideGlobalData) // On the ALL page we dont need to give a beginning/ending date for the hall, since ALL isnt a hall
+            {
+                applicationdates.Visible = false;
+            }
+            else // Otherwise, populate the two boxes (if the data exists)
+            {
+                updateApplicationTimes();
+            }
+
+            // Admin stuff
+            if (hideGlobalData)
+            {
+                DataTable tab = DeskDA.getValidHalls();
+                
+            //    addadminhalllist.DataSource = tab;
+            //    addadminhalllist.DataTextField = tab.Columns["Hall"].ColumnName.ToString();
+            //    addadminhalllist.DataValueField = tab.Columns["HallID"].ColumnName.ToString();
+            //    addadminhalllist.DataBind();
+                updateAdmins();
+            }
+            else
+            {
+                halladmins.InnerHtml = "";
+                displayHallAdmins();
+            }
+
+
+            // Application Texts stuff
+            DataTable table = DeskDA.getAllApplicationTexts();
+            appTextListBox.DataSource = table;
+            appTextListBox.DataTextField = table.Columns["name"].ColumnName.ToString();
+            appTextListBox.DataBind();
+            ChangeAppTextListBox(null, null);
+
+            if (hideGlobalData) // Dont need to show the default master content box to "ALL"
+            {
+                defaultcbox.Visible = false;
+            }
+
+            // Preview App stuff
+            if (hideGlobalData) // Dont need to preview an app in global admin mode
+            {
+                previewapp.InnerHtml = "";
+            }
+            else
+            {
+                previewlink.HRef = "DeskApplication.aspx?hall=" + DeskDA.getValidHallName(hallID) + "&preview=1";
+            }
+
+            // Preferences stuff
+            if (hideGlobalData) // Dont need global admins to see this
+            {
+                preferencesdiv.InnerHtml = "";
+            }
+            else
+            {
+                updatePreferences();
+            }
+
+            // View apps link stuff
+            viewappslink.HRef = "ViewApplications.aspx?hallid=" + hallID;
+        }
+    }
+
+    protected void updateQuestions()
+    {
+        // Questions stuff
+        questions.DataSource = DeskDA.getQuestionsForHall(hallID);
+        questions.DataBind();
+
+        foreach (RepeaterItem item in questions.Items)
+        {
+            if (!hallID.Equals("ALL")) // Dont display remove button to non-ALL halls for global content
+            {
+                HiddenField f = (HiddenField)item.FindControl("questionall");
+
+                if (f.Value.Equals("True"))
+                {
+                    ImageButton button = (ImageButton)item.FindControl("RemoveButton");
+                    button.Visible = false;
+                }
+            }
+            else // Dont display the up or down buttons for ALL
+            {
+                ImageButton upButton = (ImageButton)item.FindControl("UpButton");
+                ImageButton downButton = (ImageButton)item.FindControl("DownButton");
+                upButton.Visible = false;
+                downButton.Visible = false;
+            }
+        }
+    }
+
+    protected void updateApplicationTimes()
+    {
+        // App times stuff
+        DataTable table = DeskDA.getHallApplicationBounds(hallID);
+        appdatesrep.DataSource = table;
+        appdatesrep.DataBind();
+        ClearApplicationDatesClick(null, null);
+    }
+
+    protected void updateInterviewTimes()
+    {
+        DataSet interviewTimes = DeskDA.getTimesForDateAndHall(hallID);
+        outerRep.DataSource = interviewTimes.Tables[interviewTimes.Tables.Count - 1];
+        outerRep.DataBind();
+
+        int index = 0;
+
+        foreach (RepeaterItem item in outerRep.Items)
+        {
+            Repeater innerRepeater = (Repeater)item.FindControl("innerRep");
+
+            DataTable tempTable = interviewTimes.Tables[index].Copy();
+
+            innerRepeater.DataSource = tempTable;
+            innerRepeater.DataBind();
+
+            index++;
+        }
+    }
+
+    protected void updateAdmins()
+    {
+        DataSet admins = DeskDA.getAdministratorsByHall();
+        adminrepouter.DataSource = admins.Tables[admins.Tables.Count - 1];
+        adminrepouter.DataBind();
+
+        int index = 0;
+
+        foreach (RepeaterItem item in adminrepouter.Items)
+        {
+            Repeater innerRepeater = (Repeater)item.FindControl("adminrepinner");
+            DataTable tempTable = admins.Tables[index].Copy();
+
+            innerRepeater.DataSource = tempTable;
+            innerRepeater.DataBind();
+
+            HyperLink link = (HyperLink)item.FindControl("halllink");
+            link.NavigateUrl = "Administrator.aspx?hallid=" + admins.Tables[index].Rows[0]["HallID"].ToString();
+
+            index++;
+        }
+    }
+    protected void displayHallAdmins()
+    {
+        
+            DataTable admins = DeskDA.getAllAdministratorsForHall(hallID);
+            admininhallrepeater.DataSource = admins;
+            admininhallrepeater.DataBind();
+            
+
+    }
+
+    protected void updatePreferences()
+    {
+        if (DeskDA.getHallBlindPreference(hallID))
+        {
+            blindhallradiolist.SelectedIndex = 0;
+        }
+        else
+        {
+            blindhallradiolist.SelectedIndex = 1;
+        }
+    }
+
+    protected void AddFutureAdmin_ButtonClick(object sender, EventArgs e)
+    {
+        String s = addadmintxtbx.Text;
+        DeskDA.addAdministrator(s, hallID);
+        displayHallAdmins();
+    }
+
+/*  protected void RemoveFutureAdmin_ButtonClick(object sender, EventArgs e)
+    {
+
+    }
+
+
+    protected void AddAdminButtonClick(object sender, EventArgs e)
+    {
+        if (!addadminbox.Text.Equals(""))
+        {
+            if (DeskDA.verifyUsername(addadminbox.Text))
+            {
+                DeskDA.addAdministrator(addadminbox.Text, addadminhalllist.SelectedItem.Value);
+                addadminbox.Text = "";
+                addadmindiv.Text = "";
+                updateAdmins();
+            }
+            else
+            {
+                addadmindiv.Text = "Invalid user name";
+            }
+        }
+    }
+
+    protected void RemoveAdmin(object sender, EventArgs e)
+    {
+        ImageButton temp = (ImageButton)sender;
+        String idToRemove = temp.CommandArgument;
+        DeskDA.removeAdministrator(idToRemove);
+        updateAdmins();
+    }
+    */
+    protected void AddInterviewTime(object sender, EventArgs e)
+    {
+        DeskDA.AddInterviewTime(hallID, interviewdatebox.Text + " " + interviewtimebox1.Text, interviewdatebox.Text + " " + interviewtimebox2.Text);
+        updateInterviewTimes();
+        UpdatePanel1.Update();
+    }
+
+    protected void RemoveSelectedInterviewTimes(object sender, EventArgs e)
+    {
+        foreach (RepeaterItem item in outerRep.Items)
+        {
+            Repeater innerRepeater = (Repeater)item.FindControl("innerRep");
+
+            foreach (RepeaterItem nestedItem in innerRepeater.Items)
+            {
+                CheckBox box = (CheckBox)nestedItem.FindControl("verifytime");
+
+                if (box.Checked == true)
+                {
+                    HiddenField id = (HiddenField)nestedItem.FindControl("timeID");
+                    DeskDA.removeInterviewTime(id.Value);
+                }
+            }
+        }
+
+        updateInterviewTimes();
+    }
+
+    protected void RemoveAllInterviewTimes(object sender, EventArgs e)
+    {
+        DeskDA.removeAllInterviewTimesForHall(hallID);
+        updateInterviewTimes();
+    }
+
+
+
+
+
+    protected void ChangeAppTextListBox(object sender, EventArgs e)
+    {
+
+        DataRow row = DeskDA.getApplicationText(appTextListBox.SelectedValue.ToString(), hallID);
+
+        if (row["DefaultContent"].ToString().Equals("0"))
+        {
+            defaultContentBox.Checked = false;
+        }
+        else
+        {
+            defaultContentBox.Checked = true;
+        }
+
+        FreeTextBox1.Text = row["Text"].ToString();
+
+    }
+
+
+    protected void ClickTextSave(object sender, EventArgs e)
+    {
+        String textName = appTextListBox.SelectedValue.ToString();
+
+        bool defaultContent = false;
+        if (defaultContentBox.Checked)
+            defaultContent = true;
+
+        DeskDA.setApplicationText(textName, FreeTextBox1.Text, hallID, defaultContent);
+
+        if (defaultContent)
+        {
+            FreeTextBox1.Text = DeskDA.getApplicationText(textName, hallID)["Text"].ToString();
+        }
+    }
+
+    protected void NewQuestionButtonClick(object sender, EventArgs e)
+    {
+        if (!newquestionbox.Text.Equals(""))
+        {
+            DeskDA.addQuestionForHall(newquestionbox.Text, hallID);
+            newquestionbox.Text = "";
+
+            updateQuestions();
+        }
+    }
+
+    protected void OutButtonClick(object sender, EventArgs e)
+    {
+        ImageButton send = (ImageButton)sender;
+        DeskDA.removeQuestion(send.CommandArgument);
+        updateQuestions();
+    }
+
+    protected void UpButtonClick(object sender, EventArgs e)
+    {
+        ImageButton send = (ImageButton)sender;
+        DeskDA.moveQuestionUp(send.CommandArgument);
+        updateQuestions();
+    }
+
+    protected void DownButtonClick(object sender, EventArgs e)
+    {
+        ImageButton send = (ImageButton)sender;
+        DeskDA.moveQuestionDown(send.CommandArgument);
+        updateQuestions();
+    }
+
+    protected void BlindRadioChanged(object sender, EventArgs e)
+    {
+        bool blind;
+
+        if (blindhallradiolist.SelectedValue.Equals("blind"))
+            blind = true;
+
+        else
+            blind = false;
+
+        DeskDA.setHallBlindPreference(hallID, blind);
+    }
+
+    protected void UpdateDateBoundClick(object sender, EventArgs e)
+    {
+        ClearApplicationDatesClick(null, null);
+        Button dateRangeButton = (Button)sender;
+
+        RepeaterItem item = (RepeaterItem)dateRangeButton.Parent;
+        Label startDate = (Label)item.FindControl("startDateLabel");
+        Label endDate = (Label)item.FindControl("endDateLabel");
+
+        begindate.Text = startDate.Text;
+        enddate.Text = endDate.Text;
+        labelbox.Text = dateRangeButton.Text;
+
+        appdatesbutton.Text = "Update";
+        appdatesbutton.CommandArgument = dateRangeButton.CommandArgument;
+    }
+
+    protected void ClearApplicationDatesClick(object sender, EventArgs e)
+    {
+        begindate.Text = "";
+        enddate.Text = "";
+        labelbox.Text = "";
+
+        appdatesbutton.Text = "Add New";
+        appdatesbutton.CommandArgument = "-1";
+        appdateserrordiv.InnerHtml = "";
+    }
+
+    // Needs more, check for end date < start date, other things...
+    protected void ClickApplicationDates(object sender, EventArgs e)
+    {
+        DateTime bTime = DateTime.Parse(begindate.Text), eTime = DateTime.Parse(enddate.Text);
+
+        if (bTime.CompareTo(eTime) > 0) // The begin date was after the end date, foolish
+        {
+            appdateserrordiv.InnerHtml = "The begin date was after the end date";
+            return;
+        }
+
+        if (Int32.Parse(appdatesbutton.CommandArgument) >= 0) // If we are updating
+        {
+            if (!DeskDA.updateDateRangeForHall(appdatesbutton.CommandArgument, begindate.Text, enddate.Text, labelbox.Text, hallID))
+            {
+                appdateserrordiv.InnerHtml = "Conflicting date ranges";
+                return;
+            }
+        }
+        else // Add new app date
+        {
+            if (!DeskDA.addDateRangeForHall(begindate.Text, enddate.Text, labelbox.Text, hallID))
+            {
+                appdateserrordiv.InnerHtml = "Conflicting date ranges";
+                return;
+            }
+        }
+
+        ClearApplicationDatesClick(null, null);
+        updateApplicationTimes();
+    }
+
+    protected void ClickApplicationDatesRemove(object sender, EventArgs e)
+    {
+        ImageButton button = (ImageButton)sender;
+        DeskDA.removeDateRangeForHall(button.CommandArgument);
+        updateApplicationTimes();
+    }
+
+    protected void adminrepouter_ItemCommand(object source, RepeaterCommandEventArgs e)
+    {
+
+    }
+}

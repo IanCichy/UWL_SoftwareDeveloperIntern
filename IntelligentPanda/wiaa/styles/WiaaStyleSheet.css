@@ -1,0 +1,637 @@
+﻿.wiaa-header {
+    margin-left: 10px;
+    padding-top: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #071027;
+    height: 38px;
+    text-align: center;
+    max-width: 680px;
+}
+
+.comments {
+    font-size: 11px;
+    font-style: italic;
+}
+
+.contentText {
+    width: 680px;
+    padding-left: 30px;
+    padding-right: 30px;
+    font-size: 13px;
+    color: #030712;
+    line-height: 30px;
+    letter-spacing: -1px;
+}
+
+/*-----------------------------------------*/
+/* Style of GridView*/
+/*---------------------------------------*/
+.Report {
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: 'Open Sans', sans-serif;
+    border: 1px solid #333333;
+}
+
+    .Report td {
+        color: black;
+        border: 1px solid #333333;
+        padding: .3em;
+    }
+
+    .Report th {
+        color: white;
+        padding: 1em;
+        padding-right: 25px;
+        background-color: #333333;
+        border: none;
+    }
+
+    .Report tr:nth-child(even) {
+        background-color: #DFDFDF;
+    }
+
+    .Report tr:nth-child(odd) {
+        background-color: #F0F0F0;
+    }
+
+.contentTextTabs {
+    width: 680px;
+    font-size: 13px;
+    color: #030712;
+}
+
+.contentTextLeft {
+    width: 340px;
+    float: left;
+}
+
+.contentTextRight {
+    width: 340px;
+    float: right;
+}
+
+.left {
+    width: 30%;
+    float: left;
+    text-align: right;
+    padding-bottom: 9px;
+}
+
+.right {
+    width: 65%;
+    margin-left: 10px;
+    float: left;
+    padding-bottom: 9px;
+}
+
+.three-col-left {
+    width: 50%;
+    float: left;
+    text-align: right;
+    padding-bottom: 9px;
+}
+
+.three-col-numbers {
+    width: 10%;
+    float: left;
+    text-align: center;
+    padding-bottom: 9px;
+}
+
+.left-billing {
+    width: 65%;
+    float: left;
+    text-align: right;
+    padding-bottom: 9px;
+}
+
+.right-billing {
+    width: 30%;
+    margin-left: 10px;
+    float: left;
+    padding-bottom: 9px;
+}
+
+.divider {
+    width: 95%;
+    border-bottom: 1px solid #ccc;
+}
+
+#footer {
+    width: 738px;
+    height: 53px;
+    background: url(../../images/footer.png) no-repeat;
+    text-align: center;
+    font-size: 9px;
+    color: #2A2A2A;
+    padding-top: 25px;
+}
+
+.RoomButton {
+    background: white;
+    border: solid 1px grey;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    color: #001563;
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+    position: absolute;
+}
+
+    .RoomButton:hover {
+        background: white;
+        border: solid 1px grey;
+        font-family: Arial, sans-serif;
+        font-size: 11px;
+        font-weight: bold;
+        color: Blue;
+        background-color: White;
+    }
+
+.FloorButton {
+    width: 60px;
+    margin-bottom: 20px;
+    margin-left: 45px;
+    text-align: center;
+}
+
+.RoomsNeeded {
+    width: 25px;
+    text-align: center;
+}
+
+.MyTabStyle .ajax__tab_header {
+    font-family: "Helvetica Neue", Arial, Sans-Serif;
+    font-size: 14px;
+    font-weight: bold;
+    display: block;
+}
+
+    .MyTabStyle .ajax__tab_header .ajax__tab_outer {
+        border-color: #222;
+        color: #222;
+        padding-left: 10px;
+        border: solid 1px #d7d7d7;
+    }
+
+    .MyTabStyle .ajax__tab_header .ajax__tab_inner {
+        border-color: #666;
+        color: #666;
+        padding: 3px 10px 2px 0px;
+    }
+
+.MyTabStyle .ajax__tab_hover .ajax__tab_outer {
+    background-color: #9c3;
+}
+
+.MyTabStyle .ajax__tab_hover .ajax__tab_inner {
+    color: #fff;
+}
+
+.MyTabStyle .ajax__tab_active .ajax__tab_outer {
+    border-bottom-color: #ffffff;
+    background-color: #d7d7d7;
+}
+
+.MyTabStyle .ajax__tab_active .ajax__tab_inner {
+    color: #000;
+    border-color: #333;
+}
+
+.MyTabStyle .ajax__tab_body {
+    font-family: verdana,tahoma,helvetica;
+    font-size: 10pt;
+    background-color: #fff;
+    border-top-width: 0;
+    border: solid 1px #d7d7d7;
+    border-top-color: #ffffff;
+    padding-bottom: 15px;
+}
+
+#sanford1_map {
+    width: 450px;
+    height: 281px;
+    background: url(../../images/HallImages/Sanford1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#sanford2_map {
+    width: 450px;
+    height: 281px;
+    background: url(../../images/HallImages/Sanford2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#sanford3_map {
+    width: 450px;
+    height: 281px;
+    background: url(../../images/HallImages/Sanford3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#sanford4_map {
+    width: 450px;
+    height: 281px;
+    background: url(../../images/HallImages/Sanford4.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#angell1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Angell1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#angell2_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Angell2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#angell3_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Angell3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#angell4_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Angell4.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#coate1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Coate1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#coate2_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Coate2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#coate3_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Coate3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#coate4_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Coate4.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#laux1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Laux1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#laux2_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Laux2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#laux3_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Laux3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#laux4_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Laux4.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#hutchison1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Hutchison1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#hutchison2_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Hutchison2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#hutchison3_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Hutchison3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#hutchison4_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Hutchison4.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#drake1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Drake1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#drake2_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Drake2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#drake3_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Drake3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#drake4_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Drake4.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#wentz1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Wentz1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#wentz2_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Wentz2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#wentz3_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Wentz3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#wentz4_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Wentz4.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-left: 18%;
+}
+
+#white1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/White1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#white2_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/White2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#white3_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/White3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#white4_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/White4.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#eagle1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Eagle1.png) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#eagle2_map {
+    width: 450px;
+    height: 550px;
+    background: url(../../images/HallImages/Eagle2.png) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#eagle3_map {
+    width: 450px;
+    height: 550px;
+    background: url(../../images/HallImages/Eagle3.png) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#eagle4_map {
+    width: 450px;
+    height: 550px;
+    background: url(../../images/HallImages/Eagle4.png) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#eagle5_map {
+    width: 450px;
+    height: 550px;
+    background: url(../../images/HallImages/Eagle5.png) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#reuter1_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Reuter1.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#reuter2_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Reuter2.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#reuter3_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Reuter3.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}
+
+#reuter5_map {
+    width: 450px;
+    height: 356px;
+    background: url(../../images/HallImages/Reuter5.gif) no-repeat;
+    position: relative;
+    top: 2px;
+    left: -1px;
+    margin-top: 40px;
+    margin-left: 18%;
+}

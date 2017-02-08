@@ -1,0 +1,42 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="EquipmentStats.aspx.cs" Inherits="EquipmentStats" MasterPageFile="MasterPage.master" EnableEventValidation="false" MaintainScrollPositionOnPostback="true" %>
+
+<asp:Content runat="server" ContentPlaceHolderID="body">
+
+    <form id="FrmEquipStats" runat="server">
+
+        <br />
+        <br />
+        <asp:Label ID="LblItems" runat="server" Text="Items per page" />
+        <asp:DropDownList ID="DdlItemsfilter" runat="server" OnSelectedIndexChanged="DdlItemsfilter_SelectedIndexChanged" AutoPostBack="true">
+            <asp:ListItem Text="10" Value="10" />
+            <asp:ListItem Text="25" Value="25" />
+            <asp:ListItem Text="50" Value="50" />
+            <asp:ListItem Text="All" Value="999" />
+        </asp:DropDownList>
+
+        <div runat="server" id="divEquipmentStats">
+            <asp:GridView ID="gvEquipmentStats" runat="server" AutoGenerateColumns="false" AllowPaging="true" AllowSorting="true" PageSize="15"
+                DataSourceID="sqlEquipmentStats" BorderWidth="1px" OnRowCreated="gvEquipmentStats_RowCreated">
+                <PagerStyle CssClass="pager-row" />
+                <EditRowStyle CssClass="edit-row" />
+                <SortedAscendingCellStyle CssClass="Asc_Des_Cell_Equipment" />
+                <SortedAscendingHeaderStyle CssClass="Asc_Des_Header" />
+                <SortedDescendingCellStyle CssClass="Asc_Des_Cell_Equipment" />
+                <SortedDescendingHeaderStyle CssClass="Asc_Des_Header" />
+                <Columns>
+                    <asp:BoundField DataField="name" HeaderText="Description" SortExpression="name" />
+                    <asp:BoundField DataField="category" HeaderText="Category" SortExpression="category" />
+                    <asp:BoundField DataField="description" HeaderText="Condition" SortExpression="description" />
+                    <asp:BoundField DataField="TotalCheckout" HeaderText="Total Checkout" SortExpression="TotalCheckout" />
+                </Columns>
+            </asp:GridView>
+            <asp:SqlDataSource ID="sqlEquipmentStats" runat="server" SelectCommandType="StoredProcedure" SelectCommand="EquipmentStatsForHall">
+                <SelectParameters>
+                    <asp:SessionParameter Name="hallID" SessionField="hall" DefaultValue="-1" />
+                </SelectParameters>
+            </asp:SqlDataSource>
+        </div>
+        <br />
+        <br />
+    </form>
+</asp:Content>

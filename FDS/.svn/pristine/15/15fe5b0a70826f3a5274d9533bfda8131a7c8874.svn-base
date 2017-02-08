@@ -1,0 +1,72 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class Stats : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["hall"] == null)
+        {
+            Session["warning"] = "No hall chosen. Please choose a hall";
+            Response.Redirect("chooseHall.aspx");
+        }
+        sqlPizzaStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+        sqlProductStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+        sqlWorkerStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+        Colorize();
+    }
+
+    private void Colorize()
+    {
+        foreach (GridViewRow row in gvWorkerStats.Rows)
+        {
+            if (row.RowType == DataControlRowType.DataRow)
+            {
+                int totalShifts = int.Parse(row.Cells[1].Text.ToString());
+                int errorPizza = int.Parse(row.Cells[2].Text.ToString());
+                int errorIn = int.Parse(row.Cells[3].Text.ToString());
+                int errorOut = int.Parse(row.Cells[4].Text.ToString());
+
+  
+
+
+            }
+        }
+    
+    }
+
+    protected void btnPizzaStats_Click(object sender, EventArgs e)
+    {
+        if(divPizzaStats.Style["Display"] == "inline")
+        {
+            divPizzaStats.Style["Display"] = "none";
+        }
+        else
+        divPizzaStats.Style["Display"] = "inline";
+    }
+
+    protected void btnProductStats_Click(object sender, EventArgs e)
+    {
+        if (divProductStats.Style["Display"] == "inline")
+        {
+            divProductStats.Style["Display"] = "none";
+        }
+        else
+            divProductStats.Style["Display"] = "inline";
+    }
+
+    protected void btnWorkerStats_Click(object sender, EventArgs e)
+    {
+        if (divWorkerStats.Style["Display"] == "inline")
+        {
+            divWorkerStats.Style["Display"] = "none";
+        }
+        else
+            divWorkerStats.Style["Display"] = "inline";
+    }
+}

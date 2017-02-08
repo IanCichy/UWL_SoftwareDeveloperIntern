@@ -1,0 +1,1152 @@
+<style type="text/css">
+    .staffBox {
+        width: 96%;
+        height: auto;
+        padding: 2%;
+        margin-bottom: 1em;
+        box-shadow: 1px 1px 1px 1px #888888;
+    }
+
+    .staffPicture {
+        width: 15%;
+        height: auto;
+        display: inline-block;
+        margin-right: 4%;
+        vertical-align: top;
+    }
+
+    .staffDetails {
+        width: 80%;
+        height: auto;
+        display: inline-block;
+    }
+
+    .info {
+        width: 58%;
+        height: auto;
+        font-size: .9em;
+        margin-right: 2%;
+        display: inline-block;
+    }
+
+    .name {
+        width: 100%;
+        height: auto;
+        font-size: 1.4em;
+        font-weight: bold;
+    }
+
+    .title {
+        width: 100%;
+        height: auto;
+        font-size: 1em;
+        font-style: italic;
+    }
+
+    .contactInfo {
+        width: 100%;
+        height: auto;
+        font-weight: 1em;
+    }
+
+    .education {
+        width: 100%;
+        height: auto;
+        margin-top: 1em;
+    }
+
+    .quote {
+        width: 100%;
+        height: auto;
+        font-style: italic;
+        margin-top: 1em;
+    }
+
+    .pet {
+        width: 37%;
+        height: auto;
+        font-size: .9em;
+        border-left: 1px solid #9D9D9D;
+        padding-left: 2%;
+        vertical-align: top;
+        display: inline-block;
+    }
+
+    .petPicture {
+        width: 45%;
+        height: auto;
+        display: inline-block;
+    }
+
+    .petName {
+        width: 49%;
+        height: auto;
+        font-size: 1.4em;
+        font-weight: bold;
+        vertical-align: top;
+        display: inline-block;
+    }
+
+    .petSubtitle {
+        width: 100%;
+        height: auto;
+        font-size: .8em;
+        font-style: italic;
+        font-weight: normal;
+    }
+
+    .description {
+        width: 100%;
+        height: auto;
+        margin-top: 1em;
+    }
+</style>
+<div class="quickTabs">
+    <ul class="quickTabsNav">
+        <li><a href="#">Central Staff</a></li>
+        <li><a href="#">Office Staff</a></li>
+        <li><a href="#">Facilities Staff</a></li>
+        <li><a href="#">Hall Directors/Assistants</a></li>
+        <li><a href="#">Hall Staff &amp; Execs</a></li>
+    </ul>
+    <div class="quickTabsContent">
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Dr.%20Nick.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Dr. Nick Nicklaus
+                    </div>
+                    <div class="title">
+                        Director of Residence Life
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:nnicklaus@uwlax.edu">nnicklaus@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Bowling Green State University: History & Sociology
+					<br>
+                        Bowling Green State University: College Student Personnel
+					<br>
+                        Ball State University: Adult & Community Education
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "We often do not see things as they are but rather as we want them to be."
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/April%20Handtke.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        April Handtke
+                    </div>
+                    <div class="title">
+                        Assistant Director of Residence Life
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:ahandtke@uwlax.edu">ahandtke@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Western Illinois University: Psychology & Political Science
+					<br>
+                        Western Illinois University: Junior Community Counselors
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Patrick%20Heise.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Patrick Heise
+                    </div>
+                    <div class="title">
+                        Assistant Director of Residence Life
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:pheise@uwlax.edu">pheise@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin - La Crosse: Elementary/Middle Level Education
+					<br>
+                        Oregon State University: Student Services Administration
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "A ship in the harbor is safe, but that is not what ships are built for."- William Shedo
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Troy%20Richter.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Troy Richter
+                    </div>
+                    <div class="title">
+                        Assistant Director of Residence Life - Operations
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:trichter@uwlax.edu">trichter@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-La Crosse: History & Broadfield Social Studies Education
+					<br>
+                        Oregon State University: MS Counselor Education
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Chris%20Dziekan.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Chris Dziekan
+                    </div>
+                    <div class="title">
+                        Assistant Director of Residence Life - Leadership Education
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:cdziekan@uwlax.edu">cdziekan@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-Green Bay: Journalism & English Literature
+					<br>
+                        Syracuse University: Higher Education w/ Student Affairs emphasis
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Imagination is more important than knowledge."- Albert Einstein
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Doug%20Kuenn.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Doug Kuenn
+                    </div>
+                    <div class="title">
+                        Assistant Director of Residence Life - Facilities
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:dkuenn@uwlax.edu">dkuenn@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-La Crosse: Physical Education & Coaching
+					<br>
+                        University of Wisconsin-La Crosse: College Student Personnel
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Champions aren't made in the gyms. Champions are made from something they have deep inside of them - a desire, a dream, a vision."- Muhammad Ali
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Gary%20Heilman.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Gary Heilman
+                    </div>
+                    <div class="title">
+                        Housekeeping Supervisor
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:gheilman@uwlax.edu">gheilman@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Western Technical College: Associate's Degree
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="quickTabsContent">
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Carol%20Beckerjeck.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Carol Beckerjeck
+                    </div>
+                    <div class="title">
+                        University Services Associate
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:cbeckerjeck@uwlax.edu">cbeckerjeck@uwlax.edu</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Deb%20Miller.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Deb Miller
+                    </div>
+                    <div class="title">
+                        University Services Associate
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8076
+					<br>
+                        <a href="mailto:dmiller@uwlax.edu">dmiller@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Nicolet Area Technical College: Secretarial
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "He is not a fool who loses what he cannot keep in order to gain what he cannot lose."- Jim Elliot
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Jordan%20Harmel.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Jordan Harmel
+                    </div>
+                    <div class="title">
+                        IS Business Automation Analyst (Project)
+                    </div>
+                    <div class="contactInfo">
+                        (608) 789-2300
+					<br>
+                        <a href="mailto:jharmel@uwlax.edu">jharmel@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-La Crosse: BS Computer Science
+					<br>
+                        Western Technical College: Computer Engineering Technology
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Nick%20Thuot-Petkovich.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Nick Thuot-Petkovich
+                    </div>
+                    <div class="title">
+                        Graduate Assistant
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:thuotpet.nich@uwlax.edu">thuotpet.nich@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-La Crosse: Spanish
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Drops in separation could only fade away. Drops in cooperation made the ocean."- Mahatma Gandhi
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Sam%20Pierce.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Sam Pierce
+                    </div>
+                    <div class="title">
+                        Graduate Assistant
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:pierce.samu@uwlax.edu">pierce.samu@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-Eau Claire: Criminal Justice
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Whatever you are, be a good one."- Abraham Lincoln
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Bailey%20Steck.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Bailey Steckbauer
+                    </div>
+                    <div class="title">
+                        Graduate Assistant
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:steckbau.bail@uwlax.edu">steckbau.bail@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Denison University: Psychology & Education
+					<br>
+                        University of Wisconsin-La Crosse: Student Affairs Administration
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Education is the most powerful weapon which you can use to change the world"- Nelson Mandela
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="quickTabsContent">
+        <p>Content here to be called when "Tab 3" is clicked.</p>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/ResLife/StaffEdit/Randy%20Otto.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Randy Otto
+                    </div>
+                    <div class="title">
+                        Facilities and Maintance
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:rotto@uwlax.edu">rotto@uwlax.edu</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/ResLife/StaffEdit/Mike%20Heal_2.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Mike Heal
+                    </div>
+                    <div class="title">
+                        Facilities and Maintance
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8075
+					<br>
+                        <a href="mailto:mheal@uwlax.edu">mheal@uwlax.edu</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="quickTabsContent">
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Ashleigh%20Williams.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info" style="width: 100%;">
+                    <div class="name">
+                        Ashleigh Williams
+                    </div>
+                    <div class="title">
+                        Angell Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8081
+					<br>
+                        <a href="mailto:awilliams2@uwlax.edu">awilliams2@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Jefferson Community College
+					<br>
+                        SUNY Potsdam
+					<br>
+                        Radford University, Miami University
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        “Voici mon secret. Il est très simple: on ne voit bien qu'avec le cœur. L'essentiel est invisible pour les yeux.”- Antoine de Saint-Exupéry, Le Petit Prince
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Lisa%20Jicinsky.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Lisa Jicinsky
+                    </div>
+                    <div class="title">
+                        Coate Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8083
+					<br>
+                        <a href="mailto:ljicinsky@uwlax.edu">ljicinsky@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-La Crosse: Social Studies Secondary Education
+					<br>
+                        University of Northern Iowa: Education Leadership, Student Affairs
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Judge a man by his questions rather than by his answers."- Voltaire
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture">
+                        <img alt="" src="http://www.uwlax.edu/reslife/images/familygraphics/CabooseCrop.jpg" />
+                    </div>
+                    <div class="petName">
+                        Caboose
+					<br>
+                        <div class="petSubtitle">Coate Dog</div>
+                    </div>
+                    <div class="description">
+                        Caboose carries a Green Bay Packer blanket around the apartment with him.  He sleeps with it.  Plays with it.  And even chews it into shreds.  It's his favorite thing in the world.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Sara%20Tienhaara.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Sara Tienhaara
+                    </div>
+                    <div class="title">
+                        Drake Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8084
+					<br>
+                        <a href="mailto:stienhaara@uwlax.edu">stienhaara@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Winona State University: BA in Psychology
+					<br>
+                        Wichita State University: M.Ed. Counseling, Student Affairs emphasis
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Even if you fall on your face, at least you are moving forward."
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture" style="margin-top: 1em;">
+                        <img alt="" src="/uploadedImages/Offices-Services/ResLife/Nora.jpg" />
+                    </div>
+                    <div class="petName" style="margin-top: 1em;">
+                        Nora
+					<br>
+                        <div class="petSubtitle">Drake Cat</div>
+                    </div>
+                    <div class="description">
+                        Nora is 4 years old and was born in Kansas.  She is one of the only two breeds of cat native to the United States.  She likes to bird watch, steal the seat you were sitting in, and sit in boxes that are too small for her.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Amanda%20Hoylman.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Amanda Hoylman
+                    </div>
+                    <div class="title">
+                        Eagle Gray Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8082
+					<br>
+                        <a href="mailto:ahoylman@uwlax.edu">ahoylman@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Truman State University: BA in Public Communication, Minor in Psychology
+					<br>
+                        University of Georgia: M.Ed. in Professional Counseling
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "In a world filled with hate, we must still dare to hope. In a world filled with anger, we must still dare to comfort. In a world filled with despair, we must still dare to dream. And in a world filled with distrust, we must still dare to believe."- Michael Jackson
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture">
+                        <img alt="" src="http://www.uwlax.edu/reslife/images/familygraphics/Penny.jpg" />
+                    </div>
+                    <div class="petName">
+                        Penny
+					<br>
+                        <div class="petSubtitle">Eagle Dog</div>
+                    </div>
+                    <div class="description">
+                        Penny is a super lovable pup who enjoys cuddling, barking at skateboards, and climbing trees. Yes, climbing trees!
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Anna%20Holbrook.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Anna Holbrook
+                    </div>
+                    <div class="title">
+                        Eagle Maroon Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8089
+					<br>
+                        <a href="mailto:aholbrook@uwlax.edu">aholbrook@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-La Crosse: Psychology
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment."- Ralph Waldo Emerson
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture">
+                        <img alt="" src="http://www.uwlax.edu/reslife/images/familygraphics/Penny.jpg" />
+                    </div>
+                    <div class="petName">
+                        Penny
+					<br>
+                        <div class="petSubtitle">Eagle Dog</div>
+                    </div>
+                    <div class="description">
+                        Penny is a super lovable pup who enjoys cuddling, barking at skateboards, and climbing trees. Yes, climbing trees!
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Maryke%20Taute.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Maryke Taute
+                    </div>
+                    <div class="title">
+                        Hutchison Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8085
+					<br>
+                        <a href="mailto:mtaute@uwlax.edu">mtaute@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Carthage College: BS in Psychology, Minors in French & Religion
+					<br>
+                        University of Central Missouri: MS in College Student Personnel Administration
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "In the depth of winter, I finally learned that within me there lay an invincible summer."- Albert Camus
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture">
+                        <img alt="" src="" />
+                    </div>
+                    <div class="petName">
+                        Pandora
+					<br>
+                        <div class="petSubtitle">Hutchison Dog</div>
+                    </div>
+                    <div class="description">
+                        Pandora is an energetic German Shepherd/Collie mix who loves to run and play! She also loves to cuddle; especially after playing fetch. She is very friendly and loves meeting new people!
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Colin%20Burns-Gilbert.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Colin Burns-Gilbert
+                    </div>
+                    <div class="title">
+                        Laux Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8086
+					<br>
+                        <a href="mailto:cburns-gilbert@uwlax.edu">cburns-gilbert@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Minnesota - Twin Cities: BS in Sports Management
+					<br>
+                        University of Wisconsin-La Crosse: Masters in Student Affairs Administration
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Dream as if you'll live forever. Live as if you'll die today."- James Dean
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture">
+                        <img alt="" src="" />
+                    </div>
+                    <div class="petName">
+                        ?
+					<br>
+                        <div class="petSubtitle">Laux Dog</div>
+                    </div>
+                    <div class="description">
+                        The Burns-Gilbert's are currently looking to expand their family and hope to add a four-legged friend in the near future.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Will%20Harmon.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Will Harmon
+                    </div>
+                    <div class="title">
+                        Reuter Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8087
+					<br>
+                        <a href="mailto:wharmon@uwlax.edu">wharmon@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Nebraska-Lincoln: BS in Biological Sciences
+					<br>
+                        University of Nebraska-Lincoln: Master of the Arts in Education Admin., emphasis in Student Affairs
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "People who work together will win, whether it be against complex football defenses, or the problems of modern society."- Vince Lombardi
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture">
+                        <img alt="" src="http://www.uwlax.edu/reslife/images/familygraphics/Appa.jpg" />
+                    </div>
+                    <div class="petName">
+                        Appa
+					<br>
+                        <div class="petSubtitle">Reuter Dog</div>
+                    </div>
+                    <div class="description">
+                        Appa is a fun loving pup who was adopted in the fall of 2012. Her passions include: running, licking, spazzing out, eating peanut butter, being a large lap-dog, and destroying her toys. She is 40 pounds of love and companionship who is ALWAYS happy to see people!
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Joe%20Lasley.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Joe Lasley
+                    </div>
+                    <div class="title">
+                        Sanford Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8088
+					<br>
+                        <a href="mailto:jlasley@uwlax.edu">jlasley@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin-Eau Claire: BS in Organizational Communication
+					<br>
+                        Saint Cloud State University: MS in Higher Education Administration
+					<br>
+                        The Chicago School of Professional Psychology: Certificate, Industrial and Organizational Psychology Generalist
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Those who lead give sight to those who follow; Those who follow give life to those who lead."
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture">
+                        <img alt="" src="http://www.uwlax.edu/reslife/images/familygraphics/Appa.jpg" />
+                    </div>
+                    <div class="petName">
+                        Summer
+					<br>
+                        <div class="petSubtitle">Sanford Dog</div>
+                    </div>
+                    <div class="description">
+                        Summer came to Sanford Hall after being adopted from the Coulee Region Humane Society in May of 2012.  She is extremely soft like a teddy bear, and very friendly! She always loves to be around people, to be pet, and to get belly rubs!
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Adam%20Prescott.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Adam Prescott
+                    </div>
+                    <div class="title">
+                        Wentz Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8556
+					<br>
+                        <a href="mailto:aprescott@uwlax.edu">aprescott@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Central Michigan University: BS in Business Administration, Human Resource Management
+					<br>
+                        Indiana University of Pennsylvania: MA in Student Affairs in Higher Education
+					<br>
+                        Edgewood College: Doctor of Education, Higher Education Leadership (currently in progress)
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "But I ain't waiting for the world to change, gonna change the world for you."- Dave Matthews
+                    </div>
+                </div>
+                <div class="pet">
+                    <div class="petPicture">
+                        <img alt="" src="" />
+                    </div>
+                    <div class="petName">
+                        Quinn
+					<br>
+                        <div class="petSubtitle">Wentz Cat</div>
+                    </div>
+                    <div class="description">
+                        Quinn was adopted from the Coulee Region Humane Society in 2011.
+                    </div>
+                    <div class="petPicture">
+                        <img alt="" src="" />
+                    </div>
+                    <div class="petName">
+                        Cooper
+					<br>
+                        <div class="petSubtitle">Wentz Cat</div>
+                    </div>
+                    <div class="description">
+                        Cooper was adopted from the Winona Area Humane Society in 2012.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Kirsten%20Andrews.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Kirsten Andrews
+                    </div>
+                    <div class="title">
+                        White Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 785-8557
+					<br>
+                        <a href="mailto:kandrews@uwlax.edu">kandrews@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        Central Michigan University: Bachelor of Science in Business Administration, Human Resource Management
+					<br>
+                        Kansas State University: Master of Science, College Student Development, Administration Concentration
+					<br>
+                        Kansas State University: Graduate Certificate, Academic Advising
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Happiness is not a state to arrive at, but a manner of traveling."- Margaret Lee Runbeck
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Sarah%20Weiler.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Sarah Weiler
+                    </div>
+                    <div class="title">
+                        Angell Assistant Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 789-2147
+					<br>
+                        <a href="mailto:weiler.sara@uwlax.edu">weiler.sara@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Oklahoma: BA in Economics, Minor in Meteorology
+					<br>
+                        University of Wisconsin - La Crosse: MS in Student Affairs Administration (in progress)
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "There's no point in being grown up if you can't be childish sometimes."- Doctor Who (writer Terrance Dicks)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Kim%20Soumar.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Kim Soumar
+                    </div>
+                    <div class="title">
+                        Coate Assistant Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 789-4140
+					<br>
+                        <a href="mailto:soumar.kimb@uwlax.edu">soumar.kimb@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Illinois - Urbana-Champaign: Communications and Business
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Life is not about waiting for the storm to pass. It's about learning to dance in the rain."
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Jenna%20Fremstad.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Jenna Fremstad
+                    </div>
+                    <div class="title">
+                        Hutchison Assistant Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 789-2548
+					<br>
+                        <a href="mailto:fremstad.jenn@uwlax.edu">fremstad.jenn@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin - Madison: B.A. English Literature
+					<br>
+                        University of Wisconsin - La Crosse: Masters in Student Affairs Administration (in progress)
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "I've learned that people will forget what you said, people will forget what you did, but people will never forget how you made them feel"- Maya Angelou
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="staffBox">
+            <div class="staffPicture">
+                <img alt="" src="http://www.uwlax.edu/reslife/StaffEdit/Tiffany%20Koeshall.jpg" />
+            </div>
+            <div class="staffDetails">
+                <div class="info">
+                    <div class="name">
+                        Tiffany Koeshall
+                    </div>
+                    <div class="title">
+                        Reuter Assistant Hall Director
+                    </div>
+                    <div class="contactInfo">
+                        (608) 789-2658
+					<br>
+                        <a href="mailto:koeshall.tiff@uwlax.edu">koeshall.tiff@uwlax.edu</a>
+                    </div>
+                    <div class="education">
+                        <b>Education:</b>
+                        <br>
+                        University of Wisconsin - Stevens Point: Organizational Communication
+					<br>
+                        University of Wisconsin - La Crosse: Student Affairs Administration
+                    </div>
+                    <div class="quote">
+                        <b>Favorite Quote:</b>
+                        <br>
+                        "Some people come into our lives and quickly go. Some stay for awhile and leave footprints on our hearts. And we are never, ever the same."
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

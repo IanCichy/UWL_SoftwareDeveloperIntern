@@ -1,0 +1,72 @@
+﻿using FDS;
+using System;
+using System.Drawing;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class Options : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["hall"] == null)
+        {
+            Session["warning"] = "No hall chosen. Please choose a hall";
+            Response.Redirect("chooseHall.aspx");
+        }
+
+        var employee = Employee.GetEmployeeByEagleId(String.Format("{0}", Session["username"]));
+
+        if (employee == null)
+        {
+            Session["warning"] = "You must be logged in to do this.";
+            Response.Redirect("login.aspx");
+            return;
+        }
+
+        //Loads the Current Desk Coordinator Message
+        if (!IsPostBack)
+        {
+            txtMOTD.Text = FDS.Options.GetMessage(Hall.GetHallById(int.Parse(Session["hall"].ToString())));
+            lblDateUpdated.Text = "Last Updated: " + FDS.Options.GetMessageDate(Hall.GetHallById(int.Parse(Session["hall"].ToString())));
+        }
+    }
+
+    protected void btnUpdateMOTD_Click(object sender, EventArgs e)
+    {
+        Page.Validate();
+        if (IsValid)
+        {
+            if (txtMOTD.Text.Length < 1024)
+            {
+                FDS.Options.UpdateMessage(Hall.GetHallById(int.Parse(Session["hall"].ToString())), txtMOTD.Text, Session["username"].ToString(), DateTime.Now);
+            }
+            else
+            {
+                Session["warning"] = "Your message is " + txtMOTD.Text.Length + " characters long. The maximum allowed is 1024.";
+                Response.Redirect(Request.RawUrl);
+            }
+            txtMOTD.Text = FDS.Options.GetMessage(Hall.GetHallById(int.Parse(Session["hall"].ToString())));
+            lblDateUpdated.Text = FDS.Options.GetMessageDate(Hall.GetHallById(int.Parse(Session["hall"].ToString())));
+            lblDateUpdated.BackColor = Color.AntiqueWhite;
+        }
+    }
+
+    protected void btnEditEmploy_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("index.aspx");
+    }
+
+    protected void btnChangeHall_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("ChooseHall.aspx");
+    }
+    protected void btnTaxableDeposit_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("Assets/Forms/TaxableDepositForm.xls");
+    }
+
+    protected void btnAllTaxForm_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("Assets/Forms/Deposit_Form.xlsx");
+    }
+}

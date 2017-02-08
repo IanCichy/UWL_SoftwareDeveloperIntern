@@ -1,0 +1,561 @@
+﻿@import "preboot/less/preboot.less";
+
+// Variables used throughout
+
+@maroonBackground: #822626;
+
+body {
+    background: #DCDDDF url("Assets/Images/grey_wash_wall.png");
+    color: #000;
+    margin: 0;
+    /*padding: 0;
+    position:static;*/
+    text-align: center;
+    font-family: 'Open Sans', sans-serif;
+}
+
+input[type=submit] {
+    font-size: medium;
+    text-decoration: none;
+    padding: .2em .4em;
+}
+
+.smallWhiteInsetShadow {
+    .box-shadow(inset 0px 1px 0px 0px #ffffff);
+}
+
+.dropdown {
+    .smallWhiteInsetShadow;
+    #gradient > .vertical(#ededed, #dfdfdf);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf',GradientType=0);
+    background-color: #eeeeee;
+    border: 1px solid #dcdcdc;
+    display: inline-block;
+    cursor: pointer;
+    color: #333333;
+    font-size: medium;
+    text-decoration: none;
+    padding: .2em .4em;
+    margin: .5em;
+    text-shadow: 0px 1px 0px #ffffff;
+}
+
+#legend ul {
+    list-style-type: none;
+    text-align: left;
+    padding-left: 20px;
+    padding-right: 20px;
+
+    li span {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        margin-right: 5px;
+    }
+}
+
+.button {
+    .smallWhiteInsetShadow;
+    #gradient > .vertical(#ededed, #dfdfdf);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf',GradientType=0);
+    background-color: #ededed;
+    border-radius: 6px;
+    border: 1px solid #dcdcdc;
+    display: inline-block;
+    cursor: pointer;
+    color: #333333;
+    font-size: medium;
+    padding: .5em 1em;
+    text-decoration: none;
+    text-shadow: 0px 1px 0px #ffffff;
+    margin: .1em;
+
+    &:hover {
+        #gradient > .vertical( #dfdfdf, #ededed);
+        background: linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed',GradientType=0);
+        background-color: #dfdfdf;
+    }
+
+    &:active {
+        position: relative;
+        top: 1px;
+    }
+}
+
+.textbox {
+    text-align: center;
+    text-shadow: 0px 1px 0px #FFF;
+    outline: none;
+    border-radius: 3px;
+    border: 1px solid #717171;
+    .box-shadow(1px 1px 0px #EFEFEF);
+    margin-bottom: .4em;
+    margin-top: .4em;
+    font-size: medium;
+    font-family: 'Open Sans', sans-serif;
+}
+
+/*----------------------------------------------------------------------*/
+/*-------------Style of MASTER PAGE Header and Buttons-----------------*/
+/*--------------------------------------------------------------------*/
+
+#header_title {
+    font-size: 50pt;
+    padding-bottom: 20px;
+}
+
+#header_hall {
+    font-size: 16pt;
+    color: white;
+    top: 10px;
+    left: 15px;
+    position: absolute;
+    font-family: 'Open Sans', sans-serif;
+}
+
+#header_logout {
+    font-size: 16pt;
+    color: white;
+    top: 10px;
+    right: 15px;
+    position: absolute;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.header {
+    text-align: center;
+    color: white;
+    min-height: 120px;
+    font-family: 'Ubuntu', serif;
+    background-color: @maroonBackground;
+    filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr=@maroonBackground, endColorstr=#480000);
+    #gradient > .vertical(@maroonBackground, #480000);
+    .box-shadow(6px 8px 30px 0px rgba(92,92,92,0.75));
+}
+
+.menu {
+    padding: 0;
+    margin: 0;
+}
+
+.links {
+    display: inline-block;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+    .links a {
+        font-size: 18pt;
+        text-decoration: none;
+        color: #dedede;
+        .transition (all 0.6s ease);
+    }
+
+        .links a:hover {
+        }
+
+.menu .arrow {
+    font-size: 11px;
+    line-height: 0%;
+}
+
+/*----- Top Level -----*/
+.menu > ul > li {
+    float: left;
+    display: inline-block;
+    position: relative;
+    font-size: 19px;
+}
+
+    .menu > ul > li > a {
+        padding: .4em;
+        display: inline-block;
+    }
+
+    .menu > ul > li:hover > a, .menu > ul > .current-item > a {
+        background: #6B2828;
+    }
+
+/*----- Bottom Level -----*/
+.menu li:hover .sub-menu {
+    z-index: 1;
+    opacity: 1;
+}
+
+.sub-menu {
+    width: 120%;
+    padding: 5px 0px;
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity linear 0.15s;
+    box-shadow: 0px 2px 3px rgba(0,0,0,0.2);
+    background: #6B2828;
+}
+
+    .sub-menu li {
+        display: block;
+        font-size: 16px;
+        text-align: left;
+    }
+
+        .sub-menu li a {
+            padding: .3em;
+            display: block;
+            width: 100%;
+        }
+
+            .sub-menu li a:hover, .sub-menu .current-item a {
+                background: #6B2828;
+                background-color: #333333;
+            }
+
+/*----------------------------------------------------------------------*/
+/*---------Style of Error, Warning, Info, & Success Labels-------------*/
+/*--------------------------------------------------------------------*/
+.info, .success, .warning, .error {
+    font-size: large;
+    font-family: 'Inconsolata', sans-serif;
+    font-weight: 700;
+    border: 2px solid;
+    border-radius: 25px;
+    text-align: center;
+    padding: 1em;
+    padding-left: 4em;
+    padding-right: 4em;
+    display: inline-block;
+    margin: auto;
+    margin-top: .5em;
+    margin-bottom: .5em;
+}
+
+.error {
+    color: #d8000c;
+    background-color: #ffbaba;
+}
+
+.info {
+    color: #00529b;
+    background-color: #bde5f8;
+}
+
+.success {
+    color: #4f8a10;
+    background-color: #dff2bf;
+}
+
+.warning {
+    color: #9f6000;
+    background-color: #feefb3;
+}
+
+.dont_display {
+    display: none;
+}
+
+/*-----------------------------------------*/
+/* Style of GridViews(ANY NOT SUBCLASSED)*/
+/*---------------------------------------*/
+table {
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: 'Open Sans', sans-serif;
+}
+
+table, th, td {
+    border: 1px solid @maroonBackground;
+    padding: .3em;
+}
+
+    table th a {
+        color: white;
+        /*Stlye for Header Arrows During Sort*/
+        padding-right: 8px;
+        padding-left: 8px;
+    }
+
+th {
+    color: white;
+    padding: 1em;
+    padding-right: 25px;
+    background-color: @maroonBackground;
+}
+
+tr:nth-child(even) {
+    background-color: #F0DFDF;
+}
+
+tr:nth-child(odd) {
+    background-color: #F0F0F0;
+}
+
+.validator {
+    color: red;
+}
+
+tr.edit-row td {
+    background-color: #CCA0A0;
+}
+
+/*--------------------*/
+/* Style of the pager*/
+/*------------------*/
+tr.pager-row td {
+    background: url("Assets/Images/grey_wash_wall.png") repeat-x top;
+    border-color: transparent;
+
+    a {
+        color: #000;
+        padding: 0px 5px;
+        text-decoration: underline;
+        border: none;
+
+        :hover {
+            background-color: #CCA0A0;
+            color: #000;
+            padding: 0px 5px;
+            text-decoration: underline;
+        }
+    }
+
+    span {
+        border: none;
+        font-weight: bold;
+        color: #000;
+        padding: 0px 6px;
+    }
+}
+/*-------------------------------------*/
+/* Style of header arrows when sorting*/
+/*-----------------------------------*/
+.Asc_Des_Header {
+    background-color: #600000;
+    background-size: 16px 8px;
+
+    a {
+        padding-right: 0;
+        padding-left: 0;
+    }
+}
+
+.Asc_Des_Cell_Pizza {
+    /*background-color: #FFCF7C;*/
+    background-color: #CCA0A0;
+}
+
+.Asc_Des_Cell_Product {
+    /*background-color: #FFFF7D;*/
+    background-color: #CCA0A0;
+}
+
+.Asc_Des_Cell_Equipment {
+    /*background-color: #FFA07D;*/
+    background-color: #CCA0A0;
+}
+
+.Asc_Des_Cell_Worker {
+    /*background-color: #C3E67D;*/
+    background-color: #CCA0A0;
+}
+
+.Asc_Des_Cell {
+    /* background-color: #7DBEFF;*/
+    background-color: #CCA0A0;
+}
+
+/*----------------------------------------------------------------------*/
+/*-----Style of Containers for: Login Page, Hall Select, Search--------*/
+/*--------------------------------------------------------------------*/
+.container {
+    width: 25em;
+    height: 15em;
+    position: fixed;
+    left: 50%;
+    margin-left: -12.5em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    background: #FFFFFF;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    .box-shadow(0 1px 2px rgba(0, 0, 0, .1));
+}
+
+.container_s {
+    width: 20em;
+    height: 3em;
+    position: fixed;
+    left: 50%;
+    margin-left: -10em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    background: #FFFFFF;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    .box-shadow(0 1px 2px rgba(0, 0, 0, .1));
+}
+
+.option {
+    width: 11em;
+    float: left;
+    padding: 1em 10px 1em 10px;
+    background: #F0F0F0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    .box-shadow(0 1px 2px rgba(0, 0, 0, .1));
+    max-height: 85px;
+    min-height: 85px;
+}
+
+.marginStats {
+    margin: 0 auto;
+    float: left;
+    width: 800px;
+}
+
+.contentStats {
+    width: 800px;
+}
+
+.marginEquipment {
+    margin: 0 auto;
+    width: 1150px;
+}
+
+.gvEquipment {
+    float: left;
+    width: 800px;
+}
+
+.marginProducts {
+    margin: 0 auto;
+    width: 1150px;
+}
+
+.gvProducts {
+    float: left;
+    width: 800px;
+}
+
+.marginPizza {
+    margin: 0 auto;
+    width: 1150px;
+}
+
+.gvPizza {
+    float: left;
+    width: 800px;
+}
+
+.Excel:hover {
+    display: inline-block;
+    .transition-duration(.2s);
+    transition-property: transform;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    .box-shadow(0 0 1px rgba(0, 0, 0, 0));
+    .scale(1.2);
+}
+
+.search {
+    width: 25em;
+    height: 2em;
+    position: relative;
+    left: 50%;
+    margin-left: -12.5em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    background: #F0F0F0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    .box-shadow(0 1px 2px rgba(0, 0, 0, .1));
+}
+
+label {
+    display: inline-table;
+    margin-left: 18px;
+    padding-top: 10px;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    float: left;
+}
+
+input[type=login],
+input[type=password] {
+    color: #777;
+    padding-left: 10px;
+    margin: 10px;
+    margin-top: 12px;
+    margin-left: 18px;
+    width: 290px;
+    height: 35px;
+    border: 1px solid #c7d0d2;
+    border-radius: 2px;
+}
+
+input[type=login] {
+    background: #F8F8F8 url("Assets/Images/avatar.png") no-repeat;
+    background-size: 38px 38px;
+}
+
+input[type=password] {
+    background: #F8F8F8 url("Assets/Images/key.png") no-repeat;
+    background-size: 38px 38px;
+}
+
+input[type=login]:hover {
+    background-color: #F0F0F0;
+    border-color: #000000;
+    .transition( all 0.2s ease);
+}
+
+input[type=password]:hover {
+    background-color: #F0F0F0;
+    border-color: #000000;
+    .transition( all 0.2s ease );
+}
+
+/*------------------------------------------------*/
+/*-----Style of MOTD Box for: Option Page--------*/
+/*----------------------------------------------*/
+
+.msb {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    background-color: #F6F6F6;
+    .box-shadow(6px 8px 30px 0px rgba(92,92,92,0.75));
+    background-color: #fff;
+}
+
+.Hall_label {
+    display: inline-table;
+    font-size: 24px;
+    font-weight: bold;
+    -webkit-font-smoothing: antialiased;
+}
+
+/*------------------------------------------------*/
+/*-----Style of links for all pages--------------*/
+/*----------------------------------------------*/
+
+/* unvisited link */
+a:link {
+    color: #FFFFFF;
+}
+
+/* visited link */
+a:visited {
+    color: #FFFFFF;
+}
+
+/* mouse over link */
+a:hover {
+    color: #dedede;
+}
+
+/* selected link */
+a:active {
+    color: #dedede;
+}

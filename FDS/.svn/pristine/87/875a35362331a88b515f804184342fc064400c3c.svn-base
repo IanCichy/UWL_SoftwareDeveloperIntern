@@ -1,0 +1,191 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Script.Services;
+using System.Web.Services;
+using FDS;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Globalization;
+
+/// <summary>
+/// Provides access for Javascript AJAX requests to get statistics for use on /Stats.aspx
+/// </summary>
+[WebService(Namespace = "http://reslife.uwlax.edu/dcweb")]
+[WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
+[ScriptService]
+public class Data : System.Web.Services.WebService {
+
+    public Data () {
+
+    }
+
+    private string CreatePieChartJSONObject(string label, int value, Color color)
+    {
+        return "{ \"value\": " + value + ", \"label\": \"" + label + "\", \"color\": \"" + ColorTranslator.ToHtml(color) + "\", \"highlight\": \"" + ColorTranslator.ToHtml(ControlPaint.Light(color)) + "\" }";
+    }
+
+    // Build a dictionary, then sort it into a list, then pass it in to this
+    private string DictToLineJSON(List<KeyValuePair<string,int>> data) {
+        var keys = from d in data select d.Key;
+        var values = from d in data select d.Value;
+        var labelsString = "\"" + string.Join("\", \"", keys) + "\"";
+        var dataString =  "\"" + string.Join("\", \"", values) + "\"";
+        var json = string.Format(
+@"{{
+    ""labels"": [{0}],
+    ""datasets"": [
+        {{
+            ""fillColor"": ""rgba(151,187,205,0.2)"",
+            ""strokeColor"": ""rgba(151,187,205,1)"",
+            ""pointColor"": ""rgba(151,187,205,1)"",
+            ""pointStrokeColor"": ""#fff"",
+            ""pointHighlightFill"": ""#fff"",
+            ""pointHighlightStroke"": ""rgba(151,187,205,1)"",
+            ""data"": [{1}]
+        }}
+    ]
+}}
+", labelsString, dataString);
+
+        return json;
+    }
+
+    [WebMethod]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json, UseHttpGet=false)]
+    public void PizzaDayOfWeekLine(int hallID)
+    {
+
+        var data = GetDayOfWeekStats("SELECT * FROM dbo.StatsPizzaWeekDayByHall(@hallID) ORDER BY Count DESC", hallID);
+
+        var response = DictToLineJSON(SortByDay(data));
+
+        Context.Response.Write(response);
+
+    }
+
+    [WebMethod]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json, UseHttpGet = false)]
+    public void PizzaHourLine(int hallID)
+    {
+        var data = GetHourOfDayStats("SELECT * FROM dbo.StatsPizzaHourByHall(@hallID) ORDER BY Hour", hallID);
+
+        var response = DictToLineJSON(data.ToList());
+
+        Context.Response.Write(response);
+    }
+
+    [WebMethod]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json, UseHttpGet = false)]
+    public void PackageDayOfWeekLine(int hallID)
+    {
+        var data = GetDayOfWeekStats("SELECT * FROM dbo.StatsPackagesWeekDayByHall(@hallID) ORDER BY Count DESC", hallID);
+
+        var response = DictToLineJSON(SortByDay(data));
+
+        Context.Response.Write(response);
+
+    }
+
+    [WebMethod]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json, UseHttpGet = false)]
+    public void PackageHourLine(int hallID)
+    {
+
+        var data = GetHourOfDayStats("SELECT * FROM dbo.StatsPackagesHourByHall(@hallID) ORDER BY Hour", hallID);
+
+        var response = DictToLineJSON(data.ToList());
+
+        Context.Response.Write(response);
+
+    }
+
+    [WebMethod]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json, UseHttpGet = false)]
+    public void ProductDayOfWeekLine(int hallID)
+    {
+        var data = GetDayOfWeekStats("SELECT * FROM [dbo].[StatsProductsWeekDayByHall] (@hallID)", hallID);
+
+        var response = DictToLineJSON(SortByDay(data));
+
+        Context.Response.Write(response);
+    }
+
+    [WebMethod]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json, UseHttpGet = false)]
+    public void ProductHourLine(int hallID)
+    {
+        var data = GetHourOfDayStats("SELECT * FROM dbo.StatsProductsHourByHall(@hallID) ORDER BY Hour", hallID);
+
+        var response = DictToLineJSON(data.ToList());
+
+        Context.Response.Write(response);
+    }
+
+    private Dictionary<string, int> GetDayOfWeekStats(string sql, int hallID)
+    {
+        var command = new SqlCommand(sql)
+        {
+            CommandType = System.Data.CommandType.Text,
+            Connection = Connections.FDSConnection()
+        };
+
+        command.Parameters.Add(new SqlParameter("hallID", hallID));
+
+        command.Connection.Open();
+        var reader = command.ExecuteReader();
+
+        var data = new Dictionary<string, int>();
+
+        while (reader.Read())
+        {
+            var day = reader["Day"].ToString();
+            var count = int.Parse(reader["Count"].ToString());
+            data.Add(day, count);
+        }
+
+        command.Connection.Close();
+
+        return data;
+    }
+
+    private Dictionary<string, int> GetHourOfDayStats(string sql, int hallID)
+    {
+        var command = new SqlCommand(sql)
+        {
+            CommandType = System.Data.CommandType.Text,
+            Connection = Connections.FDSConnection()
+        };
+        command.Parameters.Add(new SqlParameter("hallID", hallID));
+
+        command.Connection.Open();
+        var reader = command.ExecuteReader();
+
+        var data = new Dictionary<string, int>();
+        for (int h = 0; h < 24; h++)
+        {
+            data.Add(h.ToString(), 0);
+        }
+
+        while (reader.Read())
+        {
+            var hour = reader["Hour"].ToString();
+            var count = int.Parse(reader["Count"].ToString());
+            data[hour] = count;
+        }
+
+        command.Connection.Close();
+
+        return data;
+    }
+
+    private List<KeyValuePair<string, int>> SortByDay(Dictionary<string, int> data)
+    {
+        var dayNames = Array.ConvertAll(CultureInfo.CurrentCulture.DateTimeFormat.DayNames, d => d.ToUpperInvariant());
+        return data.ToList().OrderBy(kv => (Array.IndexOf(dayNames, kv.Key.ToUpper()) + 6) % 7).ToList();
+    }
+
+}

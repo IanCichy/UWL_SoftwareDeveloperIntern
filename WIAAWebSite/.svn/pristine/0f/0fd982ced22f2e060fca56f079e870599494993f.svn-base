@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class confirmation : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        Reservation current = (Reservation)Session["CurrentApp"];
+
+        string emailBody =  "<h3>School Information</h3>" +
+                            "      School Name: " + current.school + "<br/>" +
+                            "            Phone: " + current.schoolPhone+ "<br/>" +
+                            "              Fax: " + current.fax + "<br/>" +
+                            "          Address: " + current.address + "<br/>" +
+                            "             City: " + current.city + "<br/>" +
+                            "              Zip: " + current.zip + "<br/>" +
+                            "<h3>Contact Information</h3>" +
+                            "       First Name: " + current.fname + "<br/>" +
+                            "        Last Name: " + current.lname + "<br/>" +
+                            "            Email: " + current.email + "<br/>" +
+                            "    Contact Title: " + current.title + "<br/>" +
+                            "       Cell Phone: " + current.cell + "<br/>" +
+                            "Athletic Director: " + current.athleticDir + "<br/>" +
+                            "       Coach Name: " + current.coach + "<br/>" +
+                            "<h3>Thursday Reservations</h3>" +
+                            "   Female Singles: " + current.fst + "<br/>" +
+                            "     Male Singles: " + current.mst + "<br/>" +
+                            "   Female Doubles: " + current.fdt + "<br/>" +
+                            "     Male Doubles: " + current.mdt + "<br/>" +
+                            "<h3>Friday Reservations</h3>" +
+                            "   Female Singles: " + current.fsf + "<br/>" +
+                            "     Male Singles: " + current.msf + "<br/>" +
+                            "   Female Doubles: " + current.fdf + "<br/>" +
+                            "     Male Doubles: " + current.mdf + "<br/>" +
+                            "<h3>Total Cost</h3>" +
+                            "Amount Due (Females): $" + current.GetFemaleCost() + "<br/>" +
+                            "  Amount Due (Males): $" + current.GetMaleCost() + "<br/>" +
+                            "        <b>Total Due:</b> $" + current.GetTotal() + "<br/><br/>";
+
+        Email.sendMessage(current.email, "UW - La Crosse Housing Confirmation: 2014 WIAA State Track and Field", emailBody);
+    }
+}

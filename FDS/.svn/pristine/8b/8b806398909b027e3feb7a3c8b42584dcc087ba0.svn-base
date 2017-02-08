@@ -1,0 +1,321 @@
+﻿#region
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+
+#endregion
+
+namespace FDS
+{
+    public class Package
+    {
+        #region Properties
+
+        public String Carrier;
+        public decimal Cost;
+        public Employee DeliveredBy;
+        public DateTime? DeliveredOn;
+        public String Description;
+        public String EagleId;
+        public Hall Hall;
+        public int PackageId;
+        public Employee ReceivedBy;
+        public DateTime ReceivedOn;
+
+        #endregion Properties
+
+        #region Public Static Methods
+
+        /// <summary>
+        ///     Adds a package
+        /// </summary>
+        /// <param name="hall">Hall of package</param>
+        /// <param name="eagleId">Eagle ID of student package is for</param>
+        /// <param name="description">Description of the package</param>
+        /// <param name="carrier">Carrier of the package</param>
+        /// <param name="cost">Cost of the package</param>
+        /// <param name="employee">Employee that received the package</param>
+        public static void ReceivePackage(int hallId, String eagleId, String description, String carrier, decimal cost,
+            String employee)
+        {
+            // Set up command
+            var command =
+                new SqlCommand(
+                    "INSERT INTO Packages VALUES ( @description, @carrier, @Student, @ReceivedBy, NULL, @receivedOn, NULL, @hallId, @cost)")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("hallId", hallId));
+            command.Parameters.Add(new SqlParameter("student", eagleId));
+            command.Parameters.Add(new SqlParameter("description", description));
+            command.Parameters.Add(new SqlParameter("carrier", carrier));
+            command.Parameters.Add(new SqlParameter("cost", cost));
+            command.Parameters.Add(new SqlParameter("ReceivedBy", employee));
+            command.Parameters.Add(new SqlParameter("receivedOn", DateTime.Now));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+        }
+
+        public static void ReceivePackageEmail(String eagleId, String HallName, Decimal Cash)
+        {
+            // Set up command
+            var command =
+                new SqlCommand("ReceivedPackageEmail")
+                {
+                    CommandType = CommandType.StoredProcedure,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("Hall", HallName));
+            command.Parameters.Add(new SqlParameter("Login", eagleId));
+            command.Parameters.Add(new SqlParameter("Cost", Cash));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+        }
+
+        public static void DeliverPackage(int packageID, String employee)
+        {
+            // Set up command
+            var command =
+                new SqlCommand(
+                    "UPDATE Packages Set DeliveredBy=@deliveredBy, DateDelivered=@deliveredOn WHERE PackageID=@packageID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("deliveredBy", employee));
+            command.Parameters.Add(new SqlParameter("packageID", packageID));
+            command.Parameters.Add(new SqlParameter("deliveredOn", DateTime.Now));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+        }
+
+        /// <summary>
+        /// Get a package by the package ID
+        /// </summary>
+        /// <param name="packageId">ID of package to find</param>
+        /// <returns>Corresponding package if one is found, null otherwise</returns>
+        public static Package GetPackageById(int packageId)
+        {
+            // Set up command
+            var command =
+                new SqlCommand(
+                    "SELECT * FROM Packages WHERE packageID=@packageId")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("packageId", packageId));
+
+            // Execute command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            if (reader.Read())
+            {
+                var package = new Package
+                {
+                    PackageId = int.Parse(String.Format("{0}", reader["packageID"])),
+                    Hall = Hall.GetHallById(int.Parse(String.Format("{0}", reader["hallID"]))),
+                    EagleId = String.Format("{0}", reader["student"]),
+                    Description = String.Format("{0}", reader["description"]),
+                    Carrier = String.Format("{0}", reader["carrier"]),
+                    Cost = decimal.Parse(String.Format("{0}", reader["cost"])),
+                    ReceivedBy =
+                        Employee.GetEmployeeByEmployeeId(int.Parse(String.Format("{0}", reader["ReceivedBy"]))),
+                    ReceivedOn = DateTime.Parse(String.Format("{0}", reader["receivedOn"])),
+                    DeliveredBy =
+                        reader["deliveredBy"] == DBNull.Value
+                            ? null
+                            : Employee.GetEmployeeByEmployeeId(int.Parse(String.Format("{0}", reader["deliveredBy"]))),
+                    DeliveredOn =
+                        reader["deliveredOn"] == DBNull.Value
+                            ? (DateTime?)null
+                            : DateTime.Parse(String.Format("{0}", reader["deliveredOn"]))
+                };
+                reader.Close();
+                command.Connection.Close();
+                return package;
+            }
+
+            // No package found, return null
+            reader.Close();
+            command.Connection.Close();
+            return null;
+        }
+
+        /// <summary>
+        ///     Gets all packages for a hall
+        /// </summary>
+        /// <param name="hall">Hall to get packages for</param>
+        /// <returns>List of all packages for given hall</returns>
+        public static List<Package> GetPackagesForHall(Hall hall)
+        {
+            // Set up command
+            var command = new SqlCommand("SELECT * FROM Packages WHERE hallID=@hallID ORDER BY packageID DESC")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("hallID", hall.HallId));
+
+            // Execute command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Set up a list of packages
+            var packages = new List<Package>();
+
+            // For each row, add the package to the list
+            while (reader.Read())
+            {
+                var package = new Package
+                {
+                    PackageId = int.Parse(String.Format("{0}", reader["packageID"])),
+                    Hall = Hall.GetHallById(int.Parse(String.Format("{0}", reader["hallID"]))),
+                    EagleId = String.Format("{0}", reader["student"]),
+                    Description = String.Format("{0}", reader["description"]),
+                    Carrier = String.Format("{0}", reader["carrier"]),
+                    Cost = decimal.Parse(String.Format("{0}", reader["cost"])),
+                    ReceivedBy =
+                        Employee.GetEmployeeByEmployeeId(int.Parse(String.Format("{0}", reader["ReceivedBy"]))),
+                    ReceivedOn = DateTime.Parse(String.Format("{0}", reader["receivedOn"])),
+                    DeliveredBy =
+                        reader["deliveredBy"] == DBNull.Value
+                            ? null
+                            : Employee.GetEmployeeByEmployeeId(int.Parse(String.Format("{0}", reader["deliveredBy"]))),
+                    DeliveredOn =
+                        reader["deliveredOn"] == DBNull.Value
+                            ? (DateTime?)null
+                            : DateTime.Parse(String.Format("{0}", reader["deliveredOn"]))
+                };
+                packages.Add(package);
+            }
+
+            // Close everything and return the list
+            reader.Close();
+            command.Connection.Close();
+            return packages;
+        }
+
+        /// <summary>
+        ///     Gets undelivered packages for the given hall
+        /// </summary>
+        /// <param name="hall">Hall to get undelivered packages for</param>
+        /// <returns>List of undelivered packages</returns>
+        public static List<Package> GetUndeliveredPackagesForhall(Hall hall)
+        {
+            // Set up command
+            var command =
+                new SqlCommand(
+                    "SELECT * FROM Packages WHERE hallID=@hallID AND deliveredBy IS NULL ORDER BY packageID DESC")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("hallID", hall.HallId));
+
+            // Execute command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Set up a list of packages
+            var packages = new List<Package>();
+
+            // For each row, add the package to the list
+            while (reader.Read())
+            {
+                var package = new Package
+                {
+                    PackageId = int.Parse(String.Format("{0}", reader["packageID"])),
+                    Hall = Hall.GetHallById(int.Parse(String.Format("{0}", reader["hallID"]))),
+                    EagleId = String.Format("{0}", reader["student"]),
+                    Description = String.Format("{0}", reader["description"]),
+                    Carrier = String.Format("{0}", reader["carrier"]),
+                    Cost = decimal.Parse(String.Format("{0}", reader["cost"])),
+                    ReceivedBy =
+                        Employee.GetEmployeeByEmployeeId(int.Parse(String.Format("{0}", reader["ReceivedBy"]))),
+                    ReceivedOn = DateTime.Parse(String.Format("{0}", reader["receivedOn"])),
+                    DeliveredBy =
+                        reader["deliveredBy"] == DBNull.Value
+                            ? null
+                            : Employee.GetEmployeeByEmployeeId(int.Parse(String.Format("{0}", reader["deliveredBy"]))),
+                    DeliveredOn =
+                        reader["deliveredOn"] == DBNull.Value
+                            ? (DateTime?)null
+                            : DateTime.Parse(String.Format("{0}", reader["deliveredOn"]))
+                };
+                packages.Add(package);
+            }
+
+            // Close everything and return the list
+            reader.Close();
+            command.Connection.Close();
+            return packages;
+        }
+
+        #endregion Public Static Methods
+
+        #region Public Non-Static Methods
+
+        /// <summary>
+        ///     Destroys the package from the database - WARNING: PROBABLY SHOULD ONLY BE USED FOR TESTING
+        /// </summary>
+        public void Destroy()
+        {
+            var command = new SqlCommand("DELETE FROM Packages WHERE packageID=@packageID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("packageID", PackageId));
+
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        ///     Delivers the package
+        /// </summary>
+        /// <param name="employee">Employee delivering the package</param>
+        public void Deliver(Employee employee)
+        {
+            // Set up command
+            var command =
+                new SqlCommand(
+                    "UPDATE Packages SET deliveredBy=@employeeId, deliveredOn=@deliveredOn WHERE packageID=@packageID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("packageID", PackageId));
+            command.Parameters.Add(new SqlParameter("employeeId", employee.GetEmployeeId()));
+            var now = DateTime.Now;
+            command.Parameters.Add(new SqlParameter("deliveredOn", now));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            var updatedPackage = GetPackageById(PackageId);
+
+            // Update the current object
+            DeliveredBy = updatedPackage.DeliveredBy;
+            DeliveredOn = updatedPackage.DeliveredOn;
+        }
+
+        #endregion Public Non-Static Methods
+    }
+}

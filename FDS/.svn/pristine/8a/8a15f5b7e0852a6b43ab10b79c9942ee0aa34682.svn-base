@@ -1,0 +1,55 @@
+﻿using System;
+using System.Web.UI.WebControls;
+
+public partial class WorkerStats : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["hall"] == null)
+        {
+            Session["warning"] = "No hall chosen. Please choose a hall";
+            Response.Redirect("chooseHall.aspx");
+        }
+        sqlWorkerStats.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+    }
+
+    #region sorting
+
+    /*
+ * Created by: Ian Cichy - 6/14
+ * pre/post:Standard method used for all gridviews to display up/down arrows
+ * when the data rows are being sorted
+ */
+
+    protected void gvWorkerStats_RowCreated(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.Header)
+        {
+            foreach (TableCell tc in e.Row.Cells)
+            {
+                if (tc.HasControls())
+                {
+                    // search for the header link
+                    LinkButton lnk = (LinkButton)tc.Controls[0];
+                    if (lnk != null)
+                    {
+                        // inizialize a new image
+                        System.Web.UI.WebControls.Image img = new System.Web.UI.WebControls.Image();
+                        // setting the dynamically URL of the image
+                        img.ImageUrl = "Assets/Images/" + (gvWorkerStats.SortDirection == SortDirection.Ascending ? "arrow_up" : "arrow_down") + ".png";
+                        img.Width = 16;
+                        img.Height = 8;
+                        // checking if the header link is the user's choice
+                        if (gvWorkerStats.SortExpression == lnk.CommandArgument)
+                        {
+                            // adding a space and the image to the header link
+                            tc.Controls.Add(img);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #endregion sorting
+}

@@ -1,0 +1,13 @@
+﻿namespace FDM3
+{
+    public partial class FrontDeskSuiteDataSet10
+    {
+    }
+}
+
+namespace FDM3
+{
+    public partial class FrontDeskSuiteDataSet10
+    {
+    }
+}

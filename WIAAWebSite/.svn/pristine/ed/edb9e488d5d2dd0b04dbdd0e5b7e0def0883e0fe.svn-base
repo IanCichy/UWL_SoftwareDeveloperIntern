@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Configuration;
+using System.Data;
+
+/// <summary>
+/// Summary description for Settings
+/// </summary>
+public class Settings
+{
+    public static int Year = 2016;
+    public static string PassPhrase = "rlismakingdreamscomingtrue";
+    public static string WIAAConnection = ConfigurationManager.ConnectionStrings["WIAAConnection"].ConnectionString;
+
+    public static bool isRegistrationOpen(DateTime regBegin )
+    {
+        return DateTime.Now >= regBegin;
+    }
+
+    public static bool isRegistrationOver(DateTime regEnd)
+    {
+        return DateTime.Now >= regEnd;
+    }
+}

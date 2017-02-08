@@ -1,0 +1,32 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true" CodeFile="Home.aspx.cs" Inherits="Options" %>
+
+<asp:Content ID="ContentHome" runat="server" ContentPlaceHolderID="body">
+    <form id="FormHome" runat="server">
+        <!---------------------Options!---------------->
+        <asp:Button ID="btnAllTaxForm" runat="server" Text="Cashiers Deposit Form" OnClick="btnAllTaxForm_Click" />
+        <asp:Button ID="btnTaxForm" runat="server" Text="Old Taxable Deposit Form" OnClick="btnTaxableDeposit_Click" />
+        <br />
+        <br />
+        <asp:Button ID="btnChangeHall" runat="server" Text="Change Hall" OnClick="btnChangeHall_Click" CausesValidation="False" />
+        <asp:Button ID="btnEditEmploy" runat="server" Text="Edit Employees" OnClick="btnEditEmploy_Click" />
+        <br />
+        <div id="divChangeHall" runat="server" style="display: none;">
+            <asp:DropDownList runat="server" ID="ddlHalls" CssClass="dropdown" />
+            <asp:Button runat="server" ID="btnChooseHall" OnClick="btnChooseHall_OnClick" Text="Select Hall" />
+            <asp:Button ID="btnCancel" runat="server" Text="Cancel" OnClick="btnCancel_Click" />
+        </div>
+        <br />
+        <!---------------------DC Message!---------------->
+        <div>
+            <asp:Label runat="server" ID="lblMOTD" Text="Desk Coordinator Message" />
+            <br />
+            <asp:Label runat="server" ID="lblDateUpdated" Text="Last Updated:" />
+            <br />
+            <asp:TextBox runat="server" ID="txtMOTD" TextMode="Multiline" MaxLength="256" Height="250" Width="500" Style="resize: none;"
+                CssClass="msb" placeholder="Enter A Message To Display For The Front Desk." />
+            <br />
+            <br />
+            <asp:Button ID="btnUpdate" runat="server" Text="Update" OnClick="btnUpdateMOTD_Click" CommandName="Update" />
+        </div>
+    </form>
+</asp:Content>

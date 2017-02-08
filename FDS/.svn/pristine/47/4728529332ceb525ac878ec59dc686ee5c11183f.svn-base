@@ -1,0 +1,11 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true" CodeFile="ChooseHall.aspx.cs" Inherits="ChooseHall" %>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="body" runat="Server">
+    <form runat="server">
+        <h3>Please Select A Hall</h3>
+        <div class="container_s">
+            <asp:DropDownList runat="server" ID="ddlHalls" CssClass="dropdown" />
+            <asp:Button runat="server" ID="btnChooseHall" OnClick="btnChooseHall_OnClick" Text="Select Hall" />
+        </div>
+    </form>
+</asp:Content>

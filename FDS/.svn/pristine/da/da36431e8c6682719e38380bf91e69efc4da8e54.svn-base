@@ -1,0 +1,208 @@
+﻿using FDS;
+using System;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class Products : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["hall"] == null)
+        {
+            Session["warning"] = "No hall chosen. Please choose a hall";
+            Response.Redirect("chooseHall.aspx");
+        }
+        sqlProducts.ConnectionString = FDS.Connections.FDSConnection().ConnectionString;
+    }
+
+    protected void btnHistory_Command(object sender, CommandEventArgs e)
+    {
+        //<asp:Button ID="btnHistory" runat="server" OnCommand="btnHistory_Command" CommandName="ViewHistory" CommandArgument='<%# Eval("productID") %>' Text="Product History" />
+        //Button btn = (Button)sender;
+        //var ProductID = int.Parse(btn.CommandArgument.ToString());
+        //Response.Redirect("ProductHistory.aspx");
+    }
+
+    protected void btnProductHistory_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("ProductHistory.aspx");
+    }
+
+    protected void lnkAddProduct_Click(object sender, EventArgs e)
+    {
+        divAddProduct.Style["Display"] = "inline";
+        divAddingProduct.Style["Display"] = "none";
+    }
+
+    protected void btnAddProduct_Click(object sender, EventArgs e)
+    {
+        Page.Validate();
+        if (IsValid)
+        {
+            Product newProduct = Product.AddProduct(txtName.Text, Hall.GetHallById(int.Parse((string)Session["hall"])), decimal.Parse(txtPrice.Text), int.Parse(txtInventory.Text), chkActive.Checked, chkWeeklyAccountable.Checked);
+            if (newProduct == null && Product.GetProductByNameAndHall(txtName.Text, Hall.GetHallById(int.Parse((string)Session["hall"]))) != null)
+            {
+                Session["error"] = "There is already a product with that name in this hall.";
+                Response.Redirect(Request.RawUrl);
+            }
+            else if (newProduct == null)
+            {
+                Session["error"] = "There was a problem adding this product. Please contact RLIS with the full details of your issue.";
+                Response.Redirect(Request.RawUrl);
+            }
+            divAddProduct.Style["Display"] = "none";
+            divAddingProduct.Style["Display"] = "inline";
+            gvProducts.DataBind();
+
+            txtName.Text = "";
+            txtPrice.Text = "";
+            txtInventory.Text = "";
+            chkActive.Checked = false;
+            chkWeeklyAccountable.Checked = false;
+        }
+    }
+
+    /*
+     *
+     * Possible Delete Method Upon Approval
+     */
+
+    protected void DeleteItem_Click(object sender, EventArgs e)
+    {
+        Button btn = (Button)sender;
+        Product.DeleteProduct(int.Parse(btn.CommandArgument.ToString()));
+        gvProducts.DataBind();
+
+        Response.Redirect(Request.RawUrl);
+    }
+
+    protected void btnCancel_Click(object sender, EventArgs e)
+    {
+        txtName.Text = "";
+        txtPrice.Text = "";
+        txtInventory.Text = "";
+        chkActive.Checked = false;
+        chkWeeklyAccountable.Checked = false;
+        divAddingProduct.Style["Display"] = "inline";
+        Response.Redirect(Request.RawUrl);
+    }
+
+    protected void btnClear_Click(object sender, EventArgs e)
+    {
+        txtSearch.Text = "";
+    }
+
+    protected void gvProducts_Edit(object sender, EventArgs e)
+    {
+        gvProducts.Columns[5].Visible = true;
+    }
+
+    protected void gvProducts_Cancel(object sender, EventArgs e)
+    {
+        gvProducts.Columns[5].Visible = false;
+    }
+
+    protected void gvProducts_Update(object sender, EventArgs e)
+    {
+        String Reason = "";
+        try
+        {
+            int rowIndex = 0;
+            foreach (GridViewRow row in gvProducts.Rows)
+            {
+                if (row.RowType == DataControlRowType.DataRow && ((TextBox)row.FindControl("EditReason") != null) &&
+                    (!((TextBox)row.FindControl("EditReason")).Text.ToString().Trim().Equals("")))
+                {
+                    TextBox Rsn = (TextBox)row.FindControl("EditReason");
+                    Reason = Rsn.Text.ToString();
+                    break;
+                }
+                else
+                {
+                }
+                rowIndex++;
+            }
+        }
+        catch (Exception)
+        {
+        }
+        gvProducts.Columns[5].Visible = false;
+
+        Session["Reason"] = Reason;
+        if (Reason.Equals(""))
+        {
+            Session["error"] = "Please Enter A Valid Reason";
+            Response.Redirect(Request.RawUrl);
+        }
+    }
+
+    #region Excel Export
+    /*
+     * Export to excel
+     * 
+     */
+    protected void btnExportProd_Click(object sender, EventArgs e)
+    {
+        gvProducts.AllowPaging = false;
+        gvProducts.PageSize = 999;
+        gvProducts.Columns.RemoveAt(6);
+        gvProducts.DataBind();
+
+        Response.Clear();
+        Response.AddHeader("content-disposition", "attachment;filename=FileName.xls");
+        Response.Charset = "";
+        Response.Cache.SetCacheability(HttpCacheability.NoCache);
+        Response.ContentType = "application/vnd.xls";
+
+        System.IO.StringWriter stringWrite = new System.IO.StringWriter();
+        System.Web.UI.HtmlTextWriter htmlWrite = new HtmlTextWriter(stringWrite);
+
+        gvProducts.RenderControl(htmlWrite);
+        Response.Write(stringWrite.ToString());
+        Response.End();
+    }
+
+    public override void VerifyRenderingInServerForm(Control control)
+    {
+        /* Confirms that an HtmlForm control is rendered for the specified ASP.NET
+           server control at run time. */
+    }
+    #endregion Excel Export
+
+    /*
+     * Created by: Ian Cichy - 6/14
+     * pre/post:Standard method used for all gridviews to display up/down arrows
+     * when the data rows are being sorted
+     */
+
+    protected void gvProducts_RowCreated(object sender, GridViewRowEventArgs e)
+    {
+        if (e.Row.RowType == DataControlRowType.Header)
+        {
+            foreach (TableCell tc in e.Row.Cells)
+            {
+                if (tc.HasControls())
+                {
+                    // search for the header link
+                    LinkButton lnk = (LinkButton)tc.Controls[0];
+                    if (lnk != null)
+                    {
+                        // inizialize a new image
+                        System.Web.UI.WebControls.Image img = new System.Web.UI.WebControls.Image();
+                        // setting the dynamically URL of the image
+                        img.ImageUrl = "Assets/Images/" + (gvProducts.SortDirection == SortDirection.Ascending ? "arrow_up" : "arrow_down") + ".png";
+                        img.Width = 16;
+                        img.Height = 8;
+                        // checking if the header link is the user's choice
+                        if (gvProducts.SortExpression == lnk.CommandArgument)
+                        {
+                            // adding a space and the image to the header link
+                            tc.Controls.Add(img);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

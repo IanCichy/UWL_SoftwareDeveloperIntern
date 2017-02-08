@@ -1,0 +1,1162 @@
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
+
+namespace FDM3
+{
+    public partial class Main : Form
+    {
+        //Numerical user ID (###) For Current Shift
+        private String UserID;
+
+        //Typical user (8.4) For Current Shift
+        private String NetID;
+
+        //HallID For Current Shift
+        private int HallID;
+
+        //OldHallID For Current Shift
+        private int OldHallID;
+
+        //HallName For Current Shift
+        private String HallName;
+
+        //ID For Current Shift
+        private int ShiftID;
+
+        //Is DC
+        private Boolean isDC;
+
+        //New Form to cashin/out
+        private CashIn_Out CashIn_Out;
+
+        //New Form to pizzaOptions
+        private PizzaSellOptions PizzaOptions;
+
+        //TotalCash for DcWithdraw
+        private Decimal TotalCash;
+
+        #region Main
+
+        public Main(String ID)
+        {
+            UserID = ID;
+            NetID = FDS.Employee.GetNetID(UserID);
+            InitializeComponent();
+        }
+
+        private void Main_Load(object sender, EventArgs e)
+        {
+            if (UserID != null)
+            {
+                String HostName = System.Net.Dns.GetHostName().ToLower();
+                HallID = FDS.Employee.GetHallByComputerName(HostName);
+                OldHallID = FDS.Employee.GetOldHallID_FromNew(HallID);
+                HallName = (FDS.Hall.GetHallById(HallID)).Name;
+
+                try
+                {
+                    //Is the current worker a DC?
+                    isDC = FDS.Employee.getIfDC(int.Parse(UserID), HallID);
+                }
+                catch (Exception)
+                {
+                }
+
+                lblWelcome.Text = "Welcome to the Front Desk for " + HallName + " Hall!";
+                txtCurrentMessage.Text = FDS.Options.GetMessage(HallID);
+                //Start new Shift
+                ShiftID = FDS.Shift.StartShift(HallID, int.Parse(UserID));
+            }
+            else
+            {
+                Close();
+            }
+
+            //REMOVES the minimize,maximize,and exit buttons from the upper right of the window
+            this.ControlBox = false;
+
+            if (isDC)
+            {
+                TotalCash = 0;
+            }
+            else
+            {
+                tabCntrlFrontDesk.TabPages.RemoveAt(7);
+            }
+
+            //Populate Gridviews With data from stored procedures/ Datatables
+            RefreshGridViews_All();
+
+            //Format Cells of Gridview to [Currency = c, Date = d]
+            this.DGVpizzaInventory.Columns["pizzaPrice"].DefaultCellStyle.Format = "c";
+            this.DGVproductsInventory.Columns["productPrice"].DefaultCellStyle.Format = "c";
+            this.DGVpackageInventory.Columns["packageCost"].DefaultCellStyle.Format = "c";
+            this.DGVcurrentShiftSales.Columns["CurrentSalesCost"].DefaultCellStyle.Format = "c";
+            this.DGVpackageInventory.Columns["packageDateReceived"].DefaultCellStyle.Format = "d";
+
+            //Sort Gridviews For default starting sort direction, still allows users to change stort
+            DGVdvdInventory.Sort(DGVdvdInventory.Columns[1], (System.ComponentModel.ListSortDirection.Ascending));
+
+            //Add listeners to Gridviews with multiple buttons to specify the correct method for each button
+            DGVproductsInventory.CellClick += new DataGridViewCellEventHandler(this.btnAddProductToInventory_Click);
+            DGVproductsInventory.CellClick += new DataGridViewCellEventHandler(this.btnSellProduct_Click);
+            DGVpizzaInventory.CellClick += new DataGridViewCellEventHandler(this.btnAddPizzaToInventory_Click);
+            DGVpizzaInventory.CellClick += new DataGridViewCellEventHandler(this.btnSellPizza_Click);
+
+            //Disables the ability to interact with the pizza/product pages until CASH IN has been completed
+            tabCntrlFrontDesk.TabPages[2].Enabled = false;
+            tabCntrlFrontDesk.TabPages[3].Enabled = false;
+            tabCntrlFrontDesk.TabPages[2].BackColor = Color.Salmon;
+            tabCntrlFrontDesk.TabPages[3].BackColor = Color.Salmon;
+
+            //HallID = 4;
+            //RefreshGridViews_All();
+        }
+
+        #endregion Main
+
+        #region start/endShift
+
+        /**
+         *
+         * Initalizes the cash in/out form for counting drawer money and pizza totals
+         * Passes full access to the main form and disables/enables pages as necessary
+         *
+         */
+
+        private void btnCashIn_Click(object sender, EventArgs e)
+        {
+            lblStartCashInWarning.Visible = false;
+            lblEndCashOutWarning.Visible = true;
+            btnCashOut.BackColor = Color.Salmon;
+            btnCashOut.Visible = true;
+            btnCashIn.Visible = false;
+            btnCashIn.Enabled = false;
+            btnCashOut.Enabled = false;
+
+            if (CashIn_Out == null || CashIn_Out.IsDisposed)
+            {
+                CashIn_Out = new CashIn_Out(ShiftID, HallID, this);
+                CashIn_Out.Show();
+            }
+        }
+
+        private void btnCashOut_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Are you sure you want to cash out, count pizzas, and end your shift? This will disable the ability to sell pizzas or products while you cash out.",
+                "End Shift?", MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                tabCntrlFrontDesk.TabPages[2].Enabled = false;
+                tabCntrlFrontDesk.TabPages[3].Enabled = false;
+                tabCntrlFrontDesk.TabPages[2].BackColor = Color.Salmon;
+                tabCntrlFrontDesk.TabPages[3].BackColor = Color.Salmon;
+                btnCashOut.Enabled = false;
+                CashIn_Out.CashIn_Out_RefreshPizza();
+                CashIn_Out.lblCreditValue.Text = lblValueCredits.Text.ToString();
+                CashIn_Out.Show();
+            }
+        }
+
+        //Method used during TESTING
+        private void onExitMain(object sender, FormClosingEventArgs e)
+        {
+            Application.Exit();
+        }
+
+        #endregion start/endShift
+
+        #region EquipmentHandling
+
+        /*
+         *   Searches for EQUIPMENT in the database based on the given parameters and HallID
+         *      Pre:Name
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchEquipment_Click(object sender, EventArgs e)
+        {
+            BindingSource bs = new BindingSource();
+            bs.DataSource = DGVequipmentCheckOut.DataSource;
+            String search = textBoxSearchEquipment.Text.Replace("[", "").Replace("]", "");
+            bs.Filter = "Name like '%" + search + "%' OR Category like '%" + search + "%'";
+        }
+
+        /*
+         *   Searches for STUDENTS in the database based on the given parameters and HallID
+         *      Pre:FirstName, LastName, RoomNumber
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchStudentEquipment_Click(object sender, EventArgs e)
+        {
+            String Name = txtStudentNameEquipment.Text.ToString();
+            String rNum = textBoxStudentRoomNumberEquipment.Text.ToString();
+            if (Name.Equals("") && rNum.Equals(""))
+            {
+                this.studentsForSearchTableAdapter.Fill(this.frontDeskSuiteDataSet1.StudentsForSearch, HallID, Name, "-1");
+            }
+            else
+            {
+                this.studentsForSearchTableAdapter.Fill(this.frontDeskSuiteDataSet1.StudentsForSearch, HallID, Name, rNum);
+            }
+        }
+
+        /*
+         *  Ensures only one student is selected at a time for check out/in of Equipment
+         *      Pre:-
+         *      Post:single selected row
+         */
+
+        private void DGVStudentsCheckOutEquipment_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            foreach (DataGridViewRow row in DGVStudentsCheckOutEquipment.Rows)
+            {
+                if (row.Cells["EquipmentSelectedStudent"].Value != null && row.Cells["EquipmentSelectedStudent"].Value.Equals("true"))
+                {
+                    row.Cells["EquipmentSelectedStudent"].Value = false;
+                }
+            }
+        }
+
+        //Adds Equipment item to the selected queue
+        private void btnSelectEquipment_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVequipmentCheckOut.Columns["btnSelectEquipment"].Index && e.RowIndex >= 0)
+            {
+                int equipID = int.Parse(DGVequipmentCheckOut.Rows[e.RowIndex].Cells["EquipmentIDOut"].Value.ToString());
+                FDS.Equipment.SelectItem(equipID);
+                RefreshGridViews_Equipment_Selecting();
+            }
+        }
+
+        //Removes Equipment item from the selected queue
+        private void btnUnSelectEquipment_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVequipmentList.Columns["SelectedEquipmentUnSelect"].Index && e.RowIndex >= 0)
+            {
+                int equipID = int.Parse(DGVequipmentList.Rows[e.RowIndex].Cells["SelectedEquipmentID"].Value.ToString());
+                FDS.Equipment.UnselectItem(equipID);
+                RefreshGridViews_Equipment_Selecting();
+            }
+        }
+
+        /*
+         *  Checks out 1-M equipment to a SINGLE STUDENT and also updates the History of the equipment checked out
+         *      Pre: Selected equipment(1-M), Selected Student(1)
+         *      Post: Equipment is checked out and visable in Checked out table
+         */
+
+        private void btnCheckOutEquip_Click(object sender, EventArgs e)
+        {
+            String StudentFor = "";
+            //Get The Selected Student from the DGV - only 1 row possible
+            foreach (DataGridViewRow row in DGVStudentsCheckOutEquipment.Rows)
+            {
+                if (row.Cells["EquipmentSelectedStudent"].Value != null && row.Cells["EquipmentSelectedStudent"].Value.Equals("true"))
+                {
+                    StudentFor = row.Cells["equipmentStudentID"].Value.ToString();
+                }
+            }
+            //Check To make Sure there is a student selected and there is equipment selected
+            if (StudentFor.Equals("") || DGVequipmentList.Rows.Count < 1)
+            {
+                MessageBox.Show("Please Select A Student And Equipment To Check Out!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            else
+            {
+                foreach (DataGridViewRow row in DGVequipmentList.Rows)
+                {
+                    int equipID = int.Parse(row.Cells["SelectedEquipmentID"].Value.ToString());
+                    String equipName = row.Cells["SelectedEquipmentName"].Value.ToString();
+                    String Condition = row.Cells["SelectedEquipmentCondition"].Value.ToString();
+
+                    DialogResult result = MessageBox.Show("Are You Sure You Want To Check Out The Following Eqipment:\n\tEquipment: " + equipName +
+                        "\n\tStudent: " + StudentFor,
+                           "Equipment Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        //checks out an equipment item to the student with the stats CHECKED OUT
+                        FDS.Equipment.CheckOut(equipID, HallID, 2, StudentFor, Condition, NetID);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                txtStudentNameEquipment.Text = "";
+                textBoxStudentRoomNumberEquipment.Text = "";
+                btnSearchStudentEquipment_Click(this, e);
+                RefreshGridViews_Equipment();
+            }
+        }
+
+        /*
+         *  Checks in  1 equipment item from a SINGLE STUDENT and also updates the History of the equipment checked out
+         *      Pre: Selected equipment(1), Selected Student(1)
+         *      Post: Equipment is checked back in and available again
+         */
+
+        private void btnCheckInEquipment_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVcheckInEquipment.Columns["btnCheckInEquipment"].Index && e.RowIndex >= 0)
+            {
+                String equipName = DGVcheckInEquipment.Rows[e.RowIndex].Cells["EquipmentNameIn"].Value.ToString();
+                String ConditionIn = DGVcheckInEquipment.Rows[e.RowIndex].Cells["EquipmentConditionIn"].Value.ToString();
+                String ConditionOut = DGVcheckInEquipment.Rows[e.RowIndex].Cells["EquipmentConditionOutReturn"].Value.ToString();
+                String StudentFrom = DGVcheckInEquipment.Rows[e.RowIndex].Cells["EquipmentStudentIDOut"].Value.ToString();
+
+                if (ConditionIn.Equals(""))
+                {
+                    DGVcheckInEquipment.Rows[e.RowIndex].Cells["EquipmentConditionIn"].Value = ConditionOut;
+                    ConditionIn = DGVcheckInEquipment.Rows[e.RowIndex].Cells["EquipmentConditionIn"].Value.ToString();
+                }
+                if (ConditionIn.Equals("damaged"))
+                {
+                    DialogResult dmg = MessageBox.Show("The Equipment Being Checked In Is Damaged.\nIs This Correct?",
+                        "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                    if (dmg == DialogResult.Yes)
+                    {
+                        //Sends email to HD, AHD, DC about damaged equipment
+                        FDS.Equipment.DamagedEquipmentEmail(HallName, equipName, ConditionIn, ConditionOut, StudentFrom, NetID);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                DialogResult result = MessageBox.Show("Are You Sure You Want To Check In The Following Eqipment:\n\tEquipment: " +
+                    equipName + "\n\tStudent: " + StudentFrom + "\n\tCondition Out: " + ConditionOut + "\n\tCondition In: " + ConditionIn,
+                           "Equipment Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    String equipID = DGVcheckInEquipment.Rows[e.RowIndex].Cells["EquipmentIDIn"].Value.ToString();
+                    FDS.Equipment.CheckIn(int.Parse(equipID), 1, ConditionIn, NetID);
+                    RefreshGridViews_Equipment();
+                }
+            }
+        }
+
+        /*
+         *  Displays the History for a SINGLE Equipment item in a gridview
+         *      Pre: Selected equipment(1)
+         *      Post: All rental entries are displayed
+         */
+
+        private void btnEquipmentHistory_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVequipmentInventory.Columns["btnEquipmentHistory"].Index && e.RowIndex >= 0)
+            {
+                int EqipmentID = int.Parse(DGVequipmentInventory.Rows[e.RowIndex].Cells["EquipmentIDHistory"].Value.ToString());
+                this.equipmentHistoryTableAdapter.Fill(this.frontDeskSuiteDataSet9.EquipmentHistory, EqipmentID);
+                //Sort Gridview by Date (newest to oldest)
+                DGVEquipmentHistoryItem.Sort(DGVEquipmentHistoryItem.Columns[3], (System.ComponentModel.ListSortDirection.Descending));
+            }
+        }
+
+        #endregion EquipmentHandling
+
+        #region PizzaHandling
+
+        /*
+         * Method to add Pizza to Inventory
+         */
+
+        private void btnAddPizzaToInventory_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVpizzaInventory.Columns["AddPizzaToInventory"].Index && e.RowIndex >= 0)
+            {
+                String pizzaName = DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaName"].Value.ToString();
+                String pizzaBrand = DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaBrand"].Value.ToString();
+                int pizzaID = int.Parse(DGVpizzaInventory.Rows[e.RowIndex].Cells["PizzaID"].Value.ToString());
+                int pizzaInventory = int.Parse(DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaInventory"].Value.ToString());
+
+                if (DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaAmount"].Value != null)
+                {
+                    int amount = int.Parse(DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaAmount"].Value.ToString());
+
+                    DialogResult result = MessageBox.Show("Are you sure you want to add:\t\n\tQuantity: " +
+                        amount + "\n\tBrand: " + pizzaBrand + "\n\tType: " + pizzaName + "\n\tCurrent Inventory: " + pizzaInventory,
+                              "Add Product To Inventory", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        FDS.Pizza.PizzaAdd(pizzaInventory + amount, pizzaID, amount, int.Parse(UserID), "Front Desk Worker: " + NetID, ShiftID);
+                        RefreshGridViews_Pizza();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please enter an amount!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+        }
+
+        /*
+         * Method to Sell A Pizza
+         */
+
+        private void btnSellPizza_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVpizzaInventory.Columns["SellPizza"].Index && e.RowIndex >= 0)
+            {
+                String pizzaName = DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaName"].Value.ToString();
+                String pizzaBrand = DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaBrand"].Value.ToString();
+                int pizzaID = int.Parse(DGVpizzaInventory.Rows[e.RowIndex].Cells["PizzaID"].Value.ToString());
+                int pizzaInventory = int.Parse(DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaInventory"].Value.ToString());
+                decimal pizzaPrice = decimal.Parse(DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaPrice"].Value.ToString().TrimStart('$'));
+
+                if (DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaAmount"].Value != null)
+                {
+                    int amount = int.Parse(DGVpizzaInventory.Rows[e.RowIndex].Cells["pizzaAmount"].Value.ToString());
+
+                    if (pizzaInventory >= amount)
+                    {
+                        PizzaOptions = new PizzaSellOptions(ShiftID, int.Parse(UserID), pizzaBrand, pizzaName,
+                            pizzaID, pizzaInventory, amount, pizzaPrice, this);
+                        PizzaOptions.Show();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Amount entered: " + amount +
+                            " is greater than then current inventory of: " + pizzaInventory, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please enter an amount!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+        }
+
+        #endregion PizzaHandling
+
+        #region ProductHandling
+
+        /*
+         * Method to add a product to inventory
+         */
+
+        private void btnAddProductToInventory_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVproductsInventory.Columns["AddProductToInventory"].Index && e.RowIndex >= 0)
+            {
+                String prodName = DGVproductsInventory.Rows[e.RowIndex].Cells["productName"].Value.ToString();
+                int prodID = int.Parse(DGVproductsInventory.Rows[e.RowIndex].Cells["productID"].Value.ToString());
+                int prodInventory = int.Parse(DGVproductsInventory.Rows[e.RowIndex].Cells["productInventory"].Value.ToString());
+
+                if (DGVproductsInventory.Rows[e.RowIndex].Cells["ProductAmount"].Value != null)
+                {
+                    int amount = int.Parse(DGVproductsInventory.Rows[e.RowIndex].Cells["ProductAmount"].Value.ToString());
+
+                    DialogResult result = MessageBox.Show("Are you sure you want to add:\t\n\tQuantity: " +
+                        amount + "\n\tType: " + prodName + "\n\tCurrent Inventory: " + prodInventory,
+                              "Add Product To Inventory", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        FDS.Product.ProductAdd(prodInventory + amount, prodID, amount, int.Parse(UserID), "Front Desk Worker: " + NetID, ShiftID);
+                        RefreshGridViews_Product();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please enter an amount!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+        }
+
+        /*
+         * Method to Sell A Product
+         * pre: Selected row
+         * post:  Gets all relevant information from the selected row in the GV and checks amount against inventory.
+         * Sells the product and refreshes the relevant GV's
+         */
+
+        private void btnSellProduct_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVproductsInventory.Columns["SellProduct"].Index && e.RowIndex >= 0)
+            {
+                String prodName = DGVproductsInventory.Rows[e.RowIndex].Cells["productName"].Value.ToString();
+                int prodID = int.Parse(DGVproductsInventory.Rows[e.RowIndex].Cells["productID"].Value.ToString());
+                int prodInventory = int.Parse(DGVproductsInventory.Rows[e.RowIndex].Cells["productInventory"].Value.ToString());
+                decimal prodPrice = decimal.Parse(DGVproductsInventory.Rows[e.RowIndex].Cells["productPrice"].Value.ToString().TrimStart('$'));
+
+                if (DGVproductsInventory.Rows[e.RowIndex].Cells["ProductAmount"].Value != null)
+                {
+                    int amount = int.Parse(DGVproductsInventory.Rows[e.RowIndex].Cells["ProductAmount"].Value.ToString());
+                    int isCredit = 0;
+                    decimal cost = amount * prodPrice;
+
+                    if (prodInventory >= amount)
+                    {
+                        DialogResult result = MessageBox.Show("Are you sure you want to sell:\t\n\tQuantity: " +
+                            amount + "\n\tType: " + prodName + "\n\tCurrent Inventory: " + prodInventory,
+                            "Sell Product", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result == DialogResult.Yes)
+                        {
+                            FDS.Product.ProductSell(prodInventory - amount, prodID, ShiftID, int.Parse(UserID), isCredit, amount, cost);
+                            RefreshGridViews_Product();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Amount entered: " + amount +
+                            " is greater than then current inventory of: " + prodInventory, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please enter an amount!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+        }
+
+        #endregion ProductHandling
+
+        #region PackageHandling
+
+        /*
+        *   Searches for students in the database based on the given parameters and HallID
+        *      Pre:Name
+        *      Post:Any records with matching like '%pre%' parameters
+        */
+
+        private void btnSearchStudentPackageDeliver_Click(object sender, EventArgs e)
+        {
+            BindingSource bs = new BindingSource();
+            bs.DataSource = DGVpackageInventory.DataSource;
+            String search = txtPackageSearch.Text.Replace("[", "").Replace("]", "");
+            bs.Filter = "StudentFor like '%" + search + "%' OR StudentFor like '%" + search + "%'";
+        }
+
+        /*
+         *   Searches for equipment in the database based on the given parameters
+         *      Pre:FirstName, LastName, RoomNumber
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchStudentPackage_Click(object sender, EventArgs e)
+        {
+            String Name = txtStudentNamePackage.Text.ToString();
+            String rNum = textBoxStudentRoomNumberPackage.Text.ToString();
+            if (Name.Equals("") && rNum.Equals(""))
+            {
+                this.studentsForSearchByHallTableAdapter.Fill(this.frontDeskSuiteDataSet21.StudentsForSearchByHall, HallID, Name, "-1");
+            }
+            else
+            {
+                this.studentsForSearchByHallTableAdapter.Fill(this.frontDeskSuiteDataSet21.StudentsForSearchByHall, HallID, Name, rNum);
+            }
+        }
+
+        /*
+         * Method to ensure only one student is selected at a time for check out/in of items
+         *
+         */
+
+        private void DGVstudentsPackage_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            foreach (DataGridViewRow row in DGVstudentsPackage.Rows)
+            {
+                if (row.Cells["packageStudent"].Value != null && row.Cells["packageStudent"].Value.Equals("true"))
+                {
+                    row.Cells["packageStudent"].Value = false;
+                }
+            }
+        }
+
+        /*
+         * Method to receive packages
+         *  Records timestamp, emplyoee, student
+         */
+
+        private void btnReceivePackage_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in DGVstudentsPackage.Rows)
+            {
+                if (row.Cells["packageStudent"].Value != null && row.Cells["packageStudent"].Value.Equals("true"))
+                {
+                    String StudentFor = row.Cells["PackageStudentID"].Value.ToString();
+                    String Description = textBoxPackageDescription.Text.ToString();
+                    String Carrier = comboBoxPackageCarrier.Text.ToString();
+                    decimal Cost = numericUpDownCostPackages.Value;
+
+                    if (Description.Trim().Equals("") || Carrier.Trim().Equals(""))
+                    {
+                        MessageBox.Show("Please Provide A Valid Description And Carrier!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    DialogResult result = MessageBox.Show("Are You Sure You Want To Receive This Package?\n\n\tDescription: \"" + Description +
+                        "\"\n\tFor: " + StudentFor + "\n\tFrom: " + Carrier + "\n\tCost: " + Cost,
+                            "Receive Package", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        FDS.Package.ReceivePackage(HallID, StudentFor, Description, Carrier, Cost, NetID);
+                        FDS.Package.ReceivePackageEmail(StudentFor, HallName, Cost);
+
+                        txtStudentNamePackage.Text = "";
+                        textBoxStudentRoomNumberPackage.Text = "";
+                        textBoxPackageDescription.Text = "";
+                        comboBoxPackageCarrier.Text = "";
+                        numericUpDownCostPackages.Value = 0;
+                        btnSearchStudentPackage_Click(this, e);
+                        RefreshGridViews_Package();
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+            MessageBox.Show("Please Select A Student!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        /*
+         *Method to deliver packages to students when picked up
+         * Records employee and timestamp
+         */
+
+        private void btnDeliverPackage_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVpackageInventory.Columns["packageDeliver"].Index && e.RowIndex >= 0)
+            {
+                String StudentFor = DGVpackageInventory.Rows[e.RowIndex].Cells["packageStudentFor"].Value.ToString();
+                String Description = DGVpackageInventory.Rows[e.RowIndex].Cells["packageDescription"].Value.ToString();
+                String Carrier = DGVpackageInventory.Rows[e.RowIndex].Cells["packageCarrier"].Value.ToString(); ;
+                decimal Cost = decimal.Parse(DGVpackageInventory.Rows[e.RowIndex].Cells["packageCost"].Value.ToString());
+
+                DialogResult result = MessageBox.Show("Are You Sure You Want To Deliver This Package?\n\n\tDescription: \"" + Description +
+                    "\"\n\tFor: " + StudentFor + "\n\tFrom: " + Carrier + "\n\tCost: " + Cost,
+                            "Package Delivery", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes && Cost == 0)
+                {
+                    String packageID = DGVpackageInventory.Rows[e.RowIndex].Cells["PackageID"].Value.ToString();
+                    FDS.Package.DeliverPackage(int.Parse(packageID), NetID);
+                    RefreshGridViews_Package();
+                }
+                else if (result == DialogResult.Yes && Cost > 0)
+                {
+                    DialogResult payment = MessageBox.Show("This Package Has Additional Cost Associated With It Which Must Be Provided Now.\n\tCost: " + Cost,
+                           "Package Payment", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                    if (payment == DialogResult.OK)
+                    {
+                        String packageID = DGVpackageInventory.Rows[e.RowIndex].Cells["PackageID"].Value.ToString();
+                        FDS.Package.DeliverPackage(int.Parse(packageID), NetID);
+                        RefreshGridViews_Package();
+                    }
+                }
+            }
+        }
+
+        #endregion PackageHandling
+
+        #region DvdHandling
+
+        /*
+         *   Searches for DVD in the database based on the given parameters and HallID
+         *      Pre:Name
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchDvd_Click(object sender, EventArgs e)
+        {
+            BindingSource bs = new BindingSource();
+            bs.DataSource = DGVdvdInventory.DataSource;
+            String search = textBoxSearchDvd.Text.Replace("[", "").Replace("]", "");
+            bs.Filter = "Title like '%" + search + "%'";
+        }
+
+        /*
+         *  Checks out the selected DVD
+         *      pre: Selected DVD
+         *      post: Puts the DVD into the checked out table
+         */
+
+        private void btnDvdCheckOut_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVDVDcheckOut.Columns["btnCheckOutDVD"].Index && e.RowIndex >= 0)
+            {
+                String LocID = DGVDVDcheckOut.Rows[e.RowIndex].Cells["DVDCheckOutLocID"].Value.ToString();
+                DateTime ResTime = DateTime.Parse(DGVDVDcheckOut.Rows[e.RowIndex].Cells["DVDCheckOutResTime"].Value.ToString());
+                String Title = DGVDVDcheckOut.Rows[e.RowIndex].Cells["DVDCheckOutTitle"].Value.ToString();
+                String DvdNet = DGVDVDcheckOut.Rows[e.RowIndex].Cells["DVDCheckOutNetID"].Value.ToString();
+
+                DialogResult result = MessageBox.Show("Are you sure you want to check out " + Title + "\nto " + DvdNet,
+                            "DVD Check Out", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    FDS.Shift.CheckOutDvd(LocID, ResTime, NetID);
+                    RefreshGridViews_DVD();
+                }
+            }
+        }
+
+        /*
+         *  Checks in the selected DVD
+         *      pre: Selected DVD
+         *      post: Puts the DVD back into the available DVD listing
+         */
+
+        private void btnDvdCheckIn_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVDVDcheckIn.Columns["btnCheckInDVD"].Index && e.RowIndex >= 0)
+            {
+                String LocID = DGVDVDcheckIn.Rows[e.RowIndex].Cells["DVDCheckInLocID"].Value.ToString();
+                DateTime CheckOutTime = DateTime.Parse(DGVDVDcheckIn.Rows[e.RowIndex].Cells["DVDCheckInOutTime"].Value.ToString());
+                String Comment = DGVDVDcheckIn.Rows[e.RowIndex].Cells["DVDCheckInRetComment"].Value.ToString();
+
+                String Title = DGVDVDcheckIn.Rows[e.RowIndex].Cells["DVDCheckInTitle"].Value.ToString();
+                String DvdNet = DGVDVDcheckIn.Rows[e.RowIndex].Cells["DVDCheckInNetID"].Value.ToString();
+
+                DialogResult result = MessageBox.Show("Are you sure you want to check in " + Title + "\nfrom " + DvdNet,
+                            "DVD Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    FDS.Shift.CheckInDvd(LocID, CheckOutTime, Comment, NetID);
+                    RefreshGridViews_DVD();
+                }
+            }
+        }
+
+        #endregion DvdHandling
+
+        #region studentIN/Out
+
+        /*
+         *   Searches for students in the database based on the given parameters and HallID
+         *      Pre:Name
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchCheckIn_Click(object sender, EventArgs e)
+        {
+            BindingSource bs = new BindingSource();
+            bs.DataSource = DGVStudentCheckIn.DataSource;
+            String search = txtCheckInSearch.Text.Replace("[", "").Replace("]", "");
+            bs.Filter = "FirstName like '%" + search + "%' OR LastName like '%" + search + "%'";
+        }
+
+        /*
+         *   Searches for students in the database based on the given parameters and HallID
+         *      Pre:Name
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchCheckOut_Click(object sender, EventArgs e)
+        {
+            BindingSource bs = new BindingSource();
+            bs.DataSource = DGVStudentCheckOut.DataSource;
+            String search = txtCheckOutSearch.Text.Replace("[", "").Replace("]", "");
+            bs.Filter = "FirstName like '%" + search + "%' OR LastName like '%" + search + "%'";
+        }
+
+        /*
+         * Checks in a student who is currently not checked into the hall
+         *      Tables are populated manually before check in
+         */
+
+        private void btnCheckInStudent_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVStudentCheckIn.Columns["btnCheckInStudent"].Index && e.RowIndex >= 0)
+            {
+                if (DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInPhoneNumber"].Value != null &&
+                    !DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInPhoneNumber"].Value.ToString().Trim().Equals(""))
+                {
+                    int StudentID = int.Parse(DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInStudentID"].Value.ToString());
+                    String phoneNum = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInPhoneNumber"].Value.ToString();
+                    String FName = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInFirstName"].Value.ToString();
+                    String LName = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInLastName"].Value.ToString();
+                    String Rnum = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInRoom"].Value.ToString();
+
+                    DialogResult result = MessageBox.Show("Are you sure you want to check in\nStudent: " + FName +
+                        " " + LName + "\nRoom Number: " + Rnum + "\nPhone Number: " + phoneNum,
+                              "Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        FDS.Shift.CheckInStudent(StudentID);
+                        FDS.Shift.CheckInPhone(StudentID, phoneNum);
+                        RefreshGridViews_CheckInOut();
+                    }
+                }
+                else
+                {
+                    int StudentID = int.Parse(DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInStudentID"].Value.ToString());
+                    String FName = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInFirstName"].Value.ToString();
+                    String LName = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInLastName"].Value.ToString();
+                    String Rnum = DGVStudentCheckIn.Rows[e.RowIndex].Cells["CheckInRoom"].Value.ToString();
+
+                    DialogResult result = MessageBox.Show("Would you like to add a phone number?",
+                              "Phone Number", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.No)
+                    {
+                        DialogResult result2 = MessageBox.Show("Are you sure you want to check in\nStudent: " +
+                            FName + " " + LName + "\nRoom Number: " + Rnum + "\nPhone Number: NONE",
+                               "Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (result2 == DialogResult.Yes)
+                        {
+                            FDS.Shift.CheckInStudent(StudentID);
+                            RefreshGridViews_CheckInOut();
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+         * Checks OUT Students in the database who are still currently checked into a hall
+         *      tables are populated manually before checkout
+         */
+
+        private void btnCheckOutStudent_Click(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == DGVStudentCheckOut.Columns["btnCheckOutStudent"].Index && e.RowIndex >= 0)
+            {
+                String FName = DGVStudentCheckOut.Rows[e.RowIndex].Cells["CheckOutFirstName"].Value.ToString().Trim();
+                String LName = DGVStudentCheckOut.Rows[e.RowIndex].Cells["CheckOutLastName"].Value.ToString();
+                String Rnum = DGVStudentCheckOut.Rows[e.RowIndex].Cells["CheckOutRoom"].Value.ToString();
+                int StudentID = int.Parse(DGVStudentCheckOut.Rows[e.RowIndex].Cells["CheckOutStudentID"].Value.ToString());
+
+                DialogResult result2 = MessageBox.Show("Are you sure you want to check out\nStudent: " +
+                    FName + " " + LName + "\nRoom Number: " + Rnum,
+                               "Check In", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result2 == DialogResult.Yes)
+                {
+                    FDS.Shift.CheckOutStudent(StudentID);
+                    RefreshGridViews_CheckInOut();
+                }
+            }
+        }
+
+        #endregion studentIN/Out
+
+        #region GridViewRefresh
+
+        /**
+         * Methods to referesh GV data, most are trival with respect to the pages they refresh.
+         *
+         */
+
+        private void btnRefreshAll_Click(object sender, EventArgs e)
+        {
+            RefreshGridViews_All();
+        }
+
+        private void btnRefreshPackage_Click(object sender, EventArgs e)
+        {
+            this.packagesForHallTableAdapter.Fill(this.frontDeskSuiteDataSet7.PackagesForHall, HallID);
+        }
+
+        /*
+        * Method to refresh ALL gridviews in FDM after check out/in or add/sell
+        */
+
+        public void RefreshGridViews_All()
+        {
+            //TAB MAIN
+            this.salesForShiftTableAdapter.Fill(this.frontDeskSuiteDataSet10.SalesForShift, ShiftID);
+            this.inventoryChangesForShiftTableAdapter.Fill(this.frontDeskSuiteDataSet11.InventoryChangesForShift, ShiftID);
+            //TAB PIZZA
+            this.pizzasForHallTableAdapter.Fill(this.frontDeskSuiteDataSet4.PizzasForHall, HallID);
+            //TAB PRODUCT
+            this.productsForHallTableAdapter.Fill(this.frontDeskSuiteDataSet6.ProductsForHall, HallID);
+            //TAB EQIPMENT
+            this.equipmentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet5.EquipmentForHall, HallID);
+            this.equipmentForHallSelectedTableAdapter.Fill(this.frontDeskSuiteDataSet20.EquipmentForHallSelected, HallID);
+            this.equipmentForHallCheckedInTableAdapter.Fill(this.frontDeskSuiteDataSet3.EquipmentForHallCheckedIn, HallID);
+            this.equipmentForHallCheckedOutTableAdapter.Fill(this.frontDeskSuiteDataSet2.EquipmentForHallCheckedOut, HallID);
+
+            //TAB PACKAGES
+            this.packagesForHallTableAdapter.Fill(this.frontDeskSuiteDataSet7.PackagesForHall, HallID);
+
+            //DvD UNDO FAKE HALLS    HallID
+            this.getCurrentDvdReservationsTableAdapter.Fill(this.frontDeskSuiteDataSet25.getCurrentDvdReservations, HallID);
+            this.getCurrentDvdReservationsOutTableAdapter.Fill(this.frontDeskSuiteDataSet14.getCurrentDvdReservationsOut, HallID);
+            this.getCurrentDvdPurchasedTableAdapter.Fill(this.frontDeskSuiteDataSet19.getCurrentDvdPurchased, HallID);
+            this.dvdForHallTableAdapter.Fill(this.frontDeskSuiteDataSet13.DvdForHall, HallID);
+
+            //TAB CHECK IN/OUT
+            this.checkOutStudentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet15.CheckOutStudentForHall, HallName);
+            this.checkInStudentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet16.CheckInStudentForHall, HallName);
+
+            updateSalesTab();
+        }
+
+        public void RefreshGridViews_Main()
+        {
+            this.salesForShiftTableAdapter.Fill(this.frontDeskSuiteDataSet10.SalesForShift, ShiftID);
+            this.inventoryChangesForShiftTableAdapter.Fill(this.frontDeskSuiteDataSet11.InventoryChangesForShift, ShiftID);
+        }
+
+        public void RefreshGridViews_CheckInOut()
+        {
+            this.checkOutStudentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet15.CheckOutStudentForHall, HallName);
+            this.checkInStudentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet16.CheckInStudentForHall, HallName);
+        }
+
+        public void RefreshGridViews_Package()
+        {
+            this.packagesForHallTableAdapter.Fill(this.frontDeskSuiteDataSet7.PackagesForHall, HallID);
+        }
+
+        /*
+         * Refreshes all GV related to Equipment and sets the Condition IN to the Condition OUT
+         */
+
+        public void RefreshGridViews_Equipment()
+        {
+            this.equipmentForHallTableAdapter.Fill(this.frontDeskSuiteDataSet5.EquipmentForHall, HallID);
+            this.equipmentForHallSelectedTableAdapter.Fill(this.frontDeskSuiteDataSet20.EquipmentForHallSelected, HallID);
+            this.equipmentForHallCheckedInTableAdapter.Fill(this.frontDeskSuiteDataSet3.EquipmentForHallCheckedIn, HallID);
+            this.equipmentForHallCheckedOutTableAdapter.Fill(this.frontDeskSuiteDataSet2.EquipmentForHallCheckedOut, HallID);
+            
+            foreach (DataGridViewRow row in DGVcheckInEquipment.Rows)
+            {
+                String conditionOut = row.Cells["EquipmentConditionOutReturn"].Value.ToString();
+                if (!conditionOut.Equals(""))
+                {
+                    row.Cells["EquipmentConditionIn"].Value = conditionOut;
+                }
+            }
+        }
+
+        public void RefreshGridViews_Equipment_Selecting()
+        {
+            this.equipmentForHallSelectedTableAdapter.Fill(this.frontDeskSuiteDataSet20.EquipmentForHallSelected, HallID);
+            this.equipmentForHallCheckedInTableAdapter.Fill(this.frontDeskSuiteDataSet3.EquipmentForHallCheckedIn, HallID);
+        }
+
+        public void RefreshGridViews_Product()
+        {
+            this.productsForHallTableAdapter.Fill(this.frontDeskSuiteDataSet6.ProductsForHall, HallID);
+            RefreshGridViews_Main();
+            updateSalesTab();
+        }
+
+        public void RefreshGridViews_Pizza()
+        {
+            //Fixes cases where workers sell pizzas after cash out has been started
+            CashIn_Out.CashIn_Out_RefreshPizza();
+
+            this.pizzasForHallTableAdapter.Fill(this.frontDeskSuiteDataSet4.PizzasForHall, HallID);
+            RefreshGridViews_Main();
+            updateSalesTab();
+        }
+
+        private void RefreshGridViews_DVD()
+        {
+            this.getCurrentDvdReservationsTableAdapter.Fill(this.frontDeskSuiteDataSet25.getCurrentDvdReservations, HallID);
+            this.getCurrentDvdReservationsOutTableAdapter.Fill(this.frontDeskSuiteDataSet14.getCurrentDvdReservationsOut, HallID);
+            this.getCurrentDvdPurchasedTableAdapter.Fill(this.frontDeskSuiteDataSet19.getCurrentDvdPurchased, HallID);
+            this.dvdForHallTableAdapter.Fill(this.frontDeskSuiteDataSet13.DvdForHall, HallID);
+        }
+
+        private void btnRefreshReservations_Click(object sender, EventArgs e)
+        {
+            this.getCurrentDvdReservationsTableAdapter.Fill(this.frontDeskSuiteDataSet25.getCurrentDvdReservations, HallID);
+            this.getCurrentDvdReservationsOutTableAdapter.Fill(this.frontDeskSuiteDataSet14.getCurrentDvdReservationsOut, HallID);
+            this.getCurrentDvdPurchasedTableAdapter.Fill(this.frontDeskSuiteDataSet19.getCurrentDvdPurchased, HallID);
+            this.dvdForHallTableAdapter.Fill(this.frontDeskSuiteDataSet13.DvdForHall, HallID);
+        }
+
+        /*
+         * PRE:Calcuates values of item sales/ credits for a shift
+         * POST:Returns the values:
+         * Sale Quantity
+         * Sale Value
+         * Credit Quantity
+         * Credit Value
+         * Calcuated fully after any sale (pizza/products)
+         */
+
+        private void updateSalesTab()
+        {
+            int SalesQuantity = 0;
+            decimal SalesValue = 0;
+            int CreditQuantity = 0;
+            decimal CreditValue = 0;
+            foreach (DataGridViewRow row in DGVcurrentShiftSales.Rows)
+            {
+                if (Boolean.Parse(row.Cells["CurrentSalesIsCredit"].Value.ToString()) == false)
+                {
+                    SalesQuantity++;
+                    decimal itemCost = decimal.Parse(row.Cells["CurrentSalesCost"].Value.ToString());
+                    SalesValue += itemCost;
+                }
+                else
+                {
+                    CreditQuantity++;
+                    decimal creditCost = decimal.Parse(row.Cells["CurrentSalesCost"].Value.ToString());
+                    CreditValue += creditCost;
+                }
+            }
+            lblNumberItemsAll.Text = SalesQuantity.ToString();
+            lblValueItemsAll.Text = SalesValue.ToString("C2");
+            lblNumberCredits.Text = CreditQuantity.ToString();
+            lblValueCredits.Text = CreditValue.ToString("C2");
+        }
+
+        #endregion GridViewRefresh
+
+        #region Options
+
+        /*
+        *  Auto totals cash field when any of the value boxes are changed
+        */
+
+        private void btnAutoTotalCash_Click(object sender, EventArgs e)
+        {
+            TotalCash = (decimal)((int)numericUpDownNickels.Value * .05 +
+                            (int)numericUpDownDimes.Value * .1 +
+                            (int)numericUpDownQuarters.Value * .25 +
+                            (int)numericUpDownDollars.Value +
+                            (int)numericUpDownFives.Value * 5 +
+                            (int)numericUpDownTens.Value * 10);
+
+            lblTotalCash.Text = String.Format("{0:C}", TotalCash);
+        }
+
+        /*
+         * Auto totals the cashboxes and subtracts the withdraw amount to give
+         * an updated total for the hall
+         */
+
+        private void btnCalcDcWithdraw_Click(object sender, EventArgs e)
+        {
+            btnAutoTotalCash_Click(this, null);
+            if (!txtWithdrawAmt.Text.Equals(""))
+            {
+                Decimal withdraw = Decimal.Parse(txtWithdrawAmt.Text);
+                lblNewTotalCash.Text = String.Format("{0:C}", ((TotalCash - withdraw).ToString()));
+                btnSubmitDcWithdraw.Enabled = true;
+            }
+        }
+
+        /*
+         * Runs a DC Withdraw Shift
+         * PRE: Must have completed the total cash and withdraw amount boxes in the OPTIONS page and have run the calculate buton
+         * POST: Starts and ends a shift with the Total Cash, (Total Cash - Withdraw) respectively
+         *
+         */
+
+        private void btnSubmitDcWithdraw_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Are you sure you want to withdraw cash and end your shift? \n This will also close FDM.",
+               "End Shift?", MessageBoxButtons.YesNo,
+               MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                FDS.Shift.setCashIn(ShiftID, TotalCash, "DC Withdraw");
+                FDS.Shift.setCashOut(ShiftID, Decimal.Parse(lblNewTotalCash.Text), "");
+                FDS.Shift.EndShift(ShiftID);
+                Application.Exit();
+            }
+        }
+
+        #endregion Options
+
+        #region ExcelExport
+
+        /**
+         * Methods to Export GV's to Excel sheets
+         *
+         * Work by copying all the the GV contents to the clipboard and pasting them into Excel
+         *
+         * Tables are hardcoded based on a dropdown on the OPTIONS page and for each GV the Headers must by hardcoded
+         *
+         */
+
+        private void copyAlltoClipboard(DataGridView DGV)
+        {
+            DGV.SelectAll();
+            DataObject dataObj = DGV.GetClipboardContent();
+            if (dataObj != null)
+                Clipboard.SetDataObject(dataObj);
+        }
+
+        private void exportToExcel_Click(object sender, EventArgs e)
+        {
+            if (cmbPrintInventories.Text.ToString().Equals("Products"))
+            {
+                copyAlltoClipboard(DGVproductsInventory);
+            }
+            else if (cmbPrintInventories.Text.ToString().Equals("Equipment"))
+            {
+                copyAlltoClipboard(DGVequipmentInventory);
+            }
+            else if (cmbPrintInventories.Text.ToString().Equals("Pizzas"))
+            {
+                copyAlltoClipboard(DGVpizzaInventory);
+            }
+            else if (cmbPrintInventories.Text.ToString().Equals("Packages"))
+            {
+                copyAlltoClipboard(DGVpackageInventory);
+            }
+            else if (cmbPrintInventories.Text.ToString().Equals("Dvds"))
+            {
+                copyAlltoClipboard(DGVdvdInventory);
+            }
+
+            Microsoft.Office.Interop.Excel.Application xlexcel;
+            Microsoft.Office.Interop.Excel.Workbook xlWorkBook;
+            Microsoft.Office.Interop.Excel.Worksheet xlWorkSheet;
+            object misValue = System.Reflection.Missing.Value;
+            xlexcel = new Excel.Application();
+            xlexcel.Visible = true;
+            xlWorkBook = xlexcel.Workbooks.Add(misValue);
+            xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
+            Excel.Range CR = (Excel.Range)xlWorkSheet.Cells[2, 1];
+            CR.Select();
+            xlWorkSheet.PasteSpecial(CR, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, true);
+
+            if (cmbPrintInventories.Text.ToString().Equals("Products"))
+            {
+                xlWorkSheet.Cells[1, 1] = "Name";
+                xlWorkSheet.Cells[1, 2] = "Inventory";
+                xlWorkSheet.Cells[1, 3] = "Price";
+            }
+            else if (cmbPrintInventories.Text.ToString().Equals("Equipment"))
+            {
+                xlWorkSheet.Cells[1, 1] = "Name";
+                xlWorkSheet.Cells[1, 2] = "Category";
+                xlWorkSheet.Cells[1, 3] = "Condition";
+                xlWorkSheet.Cells[1, 4] = "Status";
+            }
+            else if (cmbPrintInventories.Text.ToString().Equals("Pizzas"))
+            {
+                xlWorkSheet.Cells[1, 1] = "Name";
+                xlWorkSheet.Cells[1, 2] = "Inventory";
+                xlWorkSheet.Cells[1, 3] = "Price";
+                xlWorkSheet.Cells[1, 4] = "Brand";
+            }
+            else if (cmbPrintInventories.Text.ToString().Equals("Packages"))
+            {
+                xlWorkSheet.Cells[1, 1] = "Description";
+                xlWorkSheet.Cells[1, 2] = "Carrier";
+                xlWorkSheet.Cells[1, 3] = "Student For";
+                xlWorkSheet.Cells[1, 4] = "Received By";
+                xlWorkSheet.Cells[1, 5] = "Date Received";
+                xlWorkSheet.Cells[1, 6] = "Cost";
+            }
+            else if (cmbPrintInventories.Text.ToString().Equals("Dvds"))
+            {
+                xlWorkSheet.Cells[1, 1] = "placeholder";
+                xlWorkSheet.Cells[1, 2] = "placeholder";
+                xlWorkSheet.Cells[1, 3] = "placeholder";
+            }
+        }
+
+        #endregion ExcelExport
+
+    }
+}

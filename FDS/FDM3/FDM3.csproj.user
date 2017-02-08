@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PublishUrlHistory>\\uwlstore\olfcabinet\orl\RLIS\Executables\FDM3\|\\uwlstore\olfcabinet\orl\RLIS\Executables\fdm3test\|\\wngwas03\data\rlis\fdm3test\|\\uwlstore\olfcabinet\ORL\hanrahan.andr\New Folder\|R:\hanrahan.andr\New folder\</PublishUrlHistory>
+    <InstallUrlHistory>\\uwlstore\olfcabinet\orl\RLIS\Executables\FDM3\|\\uwlstore\olfcabinet\ORL\hanrahan.andr\New Folder\</InstallUrlHistory>
+    <SupportUrlHistory />
+    <UpdateUrlHistory>\\uwlstore\olfcabinet\orl\RLIS\Executables\FDM3\|\\uwlstore\olfcabinet\orl\RLIS\Executables\fdm3test\</UpdateUrlHistory>
+    <BootstrapperUrlHistory />
+    <ErrorReportUrlHistory />
+    <FallbackCulture>en-US</FallbackCulture>
+    <VerifyUploadedFiles>false</VerifyUploadedFiles>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableSecurityDebugging>false</EnableSecurityDebugging>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,6 @@
+C:\Users\cichy.ian\Desktop\FDS\FDS\bin\Debug\FDS.dll.config
+C:\Users\cichy.ian\Desktop\FDS\FDS\bin\Debug\FDS.dll
+C:\Users\cichy.ian\Desktop\FDS\FDS\bin\Debug\FDS.pdb
+C:\Users\cichy.ian\Desktop\FDS\FDS\obj\Debug\FDS.dll
+C:\Users\cichy.ian\Desktop\FDS\FDS\obj\Debug\FDS.pdb
+C:\Users\cichy.ian\Desktop\FDS\FDS\obj\Debug\FDS.csprojResolveAssemblyReference.cache

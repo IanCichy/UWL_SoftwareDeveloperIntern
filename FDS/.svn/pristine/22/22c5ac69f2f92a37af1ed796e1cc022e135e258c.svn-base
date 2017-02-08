@@ -1,0 +1,157 @@
+﻿using FDS;
+using System;
+using System.Deployment.Application;
+using System.Windows.Forms;
+
+namespace FDM3
+{
+    public partial class FrmLogin : Form
+    {
+        private String UserID;//Used when passed to Main Form
+
+        /*
+         * Ian Cichy - 6-25-16
+         * Pre: -
+         * Post:Initalizes the Login Form and needed methods
+         *
+         */
+
+        public FrmLogin()
+        {
+            InitializeComponent();
+            check_caps();
+        }
+
+        /*
+         * Ian Cichy - 6-25-16
+         * Pre: -
+         * Post: Activates the version number, checks for program updates,
+         * and turns the login button into an action listener for the enterkey down event
+         *
+         */
+
+        private void Login_Load(object sender, EventArgs e)
+        {
+            lblVersion.Text = "V " + ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString(4);
+            InstallUpdateSyncWithInfo();
+            AcceptButton = btnLogin;
+        }
+
+        /*
+         * Ian Cichy - 6-25-16
+         * Pre: Method run on startup of login screen
+         * Post: turns on or off the capslock label
+         *
+         */
+
+        private void check_caps()
+        {
+            if (Control.IsKeyLocked(Keys.CapsLock))
+            {
+                lblCaps.Visible = true;
+            }
+            else
+            {
+                lblCaps.Visible = false;
+            }
+        }
+
+        /*
+         * Ian Cichy - 6-25-16
+         * Pre: listens for keyup events
+         * Post: toggles the caps lock is on notification if
+         * the caps lock key is pressed
+         *
+         */
+
+        private void login_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.CapsLock)
+            {
+                lblCaps.Visible = !lblCaps.Visible;
+            }
+        }
+
+        /*
+         * Ian Cichy - 6-25-16
+         * Pre: Login Id and Password supplied in login form
+         * Post: login/password filtered for multiple Eventualities
+         *
+         * Invalid: rejected with error message
+         * Not A worker: rejected with error message
+         * No Halls Assigned: rejected with error message
+         *
+         * ELSE: Login is valid and session is started in the Main Form
+         *
+         */
+
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            if ((Employee.IsValidCredentials(txtStudentId.Text, txtPassword.Text)))
+            {
+                var employee = Employee.GetEmployeeByEagleId(txtStudentId.Text);
+                if (employee == null)
+                {
+                    lblError.Visible = true;
+                    lblError.Text = "You Are Not A Front Desk Worker Currently";//Not A Valid Worker
+                    return;
+                }
+
+                UserID = employee.GetEmployeeId().ToString();
+                var list = Employee.GetEmployingHalls(employee.GetEmployeeId());
+                if (list.Count == 0)
+                {
+                    lblError.Visible = true;
+                    lblError.Text = "You Are Not A Front Desk Worker Of Any Hall";//No Halls Assigned
+                    return;
+                }
+
+                this.Hide();
+                Main FrontDesk = new Main(UserID);//Start FullFrontDeskApp with UserID
+                FrontDesk.Show();
+            }
+            else
+            {
+                lblError.Visible = true;
+                lblError.Text = "Invalid Student ID And Password Combination";//Invalid Credentials
+                return;
+            }
+        }
+
+        /*
+         * Ian Cichy - 6-25-16
+         * Pre: Program keeps record of version number. EX. 67.5.4
+         * Post: Method auto deploys updates that are manditory on program restart
+         *
+         * Built in C# Feature, IDE detects version number difference from curently deployed to any old version to force
+         * an update of the old system
+         *
+         */
+
+        private void InstallUpdateSyncWithInfo()
+        {
+            UpdateCheckInfo info = null;
+            ApplicationDeployment appDep = ApplicationDeployment.CurrentDeployment;
+            info = appDep.CheckForDetailedUpdate();
+
+            if (info.UpdateAvailable)
+            {
+                Boolean doUpdate = true;
+                if (doUpdate)
+                {
+                    try
+                    {
+                        appDep.Update();
+                        MessageBox.Show("The Front Desk Suite has been upgraded and will now restart.");
+                        Application.Restart();
+                    }
+                    catch (DeploymentDownloadException dde)
+                    {
+                        MessageBox.Show("Cannot install the latest version of the Front Desk Suite. \n\nPlease contact Residence Life Information Services with the following error. Error: " + dde);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}

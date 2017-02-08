@@ -1,0 +1,58 @@
+﻿using Rlis.Sql;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Web;
+
+/// <summary>
+/// Summary description for Settings
+/// </summary>
+public class Settings
+{
+    public static int Year = 2015;
+    public static string WIAAConnection = ConfigurationManager.ConnectionStrings["WIAAConnection"].ConnectionString;
+    public static string PandaConnection = ConfigurationManager.ConnectionStrings["PandaConnection"].ConnectionString;
+    public static string NCAAConnection = ConfigurationManager.ConnectionStrings["NCAAConnection"].ConnectionString;
+    public static string PassPhrase = "rlismakingdreamscomingtrue";
+
+    public static bool AutomaticallyPrintReceipts()
+    {
+        // Check if user is logged in, if not don't print
+        var user = HttpContext.Current.Session["Login"];
+        if (user == null)
+        {
+            return false;
+        }
+
+        var username = user.ToString();
+
+        // Check if user has turned on autoprint
+        var result = SqlHelper.ExecuteScalar(Settings.PandaConnection, CommandType.Text, "SELECT S.autoprint FROM IntelligentPanda.dbo.Users U JOIN IntelligentPanda.dbo.Settings S ON U.Uid = S.UID WHERE U.Username LIKE @username", new SqlParameter("@username", username));
+        if (result == null)
+        {
+            return false;
+        }
+        return (bool)result;
+    }
+
+    public static void SetAutomaticallyPrintReceipts(bool autoprint)
+    {
+        var user = HttpContext.Current.Session["Login"];
+        if (user == null)
+        {
+            return;
+        }
+
+        var username = user.ToString();
+
+        var result = SqlHelper.ExecuteScalar(Settings.PandaConnection, CommandType.Text, "SELECT S.autoprint FROM IntelligentPanda.dbo.Users U JOIN IntelligentPanda.dbo.Settings S ON U.Uid = S.UID WHERE U.Username LIKE @username", new SqlParameter("@username", username));
+        if (result == null)
+        {
+            SqlHelper.ExecuteNonQuery(Settings.PandaConnection, CommandType.Text, "INSERT INTO IntelligentPanda.dbo.Settings VALUES ((SELECT Uid FROM IntelligentPanda.dbo.Users WHERE Username LIKE @username), @value)", new SqlParameter("@username", username), new SqlParameter("@value", autoprint));
+        }
+        else
+        {
+            SqlHelper.ExecuteNonQuery(Settings.PandaConnection, CommandType.Text, "UPDATE IntelligentPanda.dbo.Settings SET autoprint=@value WHERE UID = (SELECT Uid FROM IntelligentPanda.dbo.Users WHERE Username LIKE @username)", new SqlParameter("@username", username), new SqlParameter("@value", autoprint));
+        }
+    }
+}

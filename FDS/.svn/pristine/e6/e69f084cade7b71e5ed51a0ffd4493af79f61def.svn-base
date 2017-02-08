@@ -1,0 +1,118 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="MasterPage" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>DC Web</title>
+    <asp:ContentPlaceHolder runat="server" ID="Stylesheets">
+        <link rel="shortcut icon" href="Assets/Images/icon_512.png" />
+        <link rel="stylesheet" href="styles.css" type="text/css" />
+        <link href="http://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet" type="text/css" />
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css" />
+        <link href='http://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css' />
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <div class="header">
+
+        <div id="header_title">
+            DC Web
+            <!-- <asp:HyperLink ID="Title" runat="server" href="Home.aspx" Text="DC Web" Style="text-decoration: none;" />-->
+        </div>
+
+        <div id="header_hall">
+            <asp:Label ID="lblHall" runat="server" />
+            <!-- DO NOT REMOVE - USED BY JAVASCRIPT TO DETERMINE HALL -->
+            <asp:Label ID="lblHallID" runat="server" Style="display: none;" Text="-1" />
+        </div>
+
+        <div id="header_logout">
+            <asp:HyperLink ID="Username" runat="server" href="Logout.aspx" Text="Log Out" />
+        </div>
+
+        <div id="Menu" class="menu">
+            <ul id="Menu_Links" class="links" runat="server">
+                <!--
+                -->
+                <li><a href="Home.aspx">
+                    <img width="28" height="28" src="Assets/Images/Home.png" />
+                    Home</a></li>
+                <!--
+                -->
+                <li><a href="#">
+                    <img width="28" height="28" src="Assets/Images/Computer.png" />
+                    Front Desk<span class="arrow">&#9660;</span></a>
+                    <ul class="sub-menu">
+                        <li><a href="Pizzas.aspx">
+                            <img width="28" height="28" src="Assets/Images/Pizza.png" />
+                            Pizza</a></li>
+                        <li><a href="Products.aspx">
+                            <img width="28" height="28" src="Assets/Images/cart.png" />
+                            Products</a></li>
+                        <li><a href="Equipment.aspx">
+                            <img width="28" height="28" src="Assets/Images/Pong.png" />
+                            Equipment</a></li>
+                        <li><a href="Dvd.aspx">
+                            <img width="28" height="28" src="Assets/Images/Dvd.png" />
+                            DVD</a></li>
+                        <li><a href="index.aspx">
+                            <img width="28" height="28" src="Assets/Images/Edit.png" />
+                            Edit Employees</a></li>
+                    </ul>
+                </li>
+                <!--
+                -->
+                <li><a href="Reports.aspx">
+                    <img width="28" height="28" src="Assets/Images/Reports.png" />
+                    Reports</a></li>
+                <!--
+                -->
+                <li><a href="#">
+                    <img width="28" height="28" src="Assets/Images/Stats.png" />
+                    Statistics<span class="arrow">&#9660;</span></a>
+                    <ul class="sub-menu">
+                        <li><a href="PizzaStats.aspx">
+                            <img width="28" height="28" src="Assets/Images/Pizza.png" />
+                            Pizza</a></li>
+                        <li><a href="ProductStats.aspx">
+                            <img width="28" height="28" src="Assets/Images/cart.png" />
+                            Products</a></li>
+                        <li><a href="EquipmentStats.aspx">
+                            <img width="28" height="28" src="Assets/Images/Pong.png" />
+                            Equipment</a></li>
+                        <li><a href="DvdStats.aspx">
+                            <img width="28" height="28" src="Assets/Images/Dvd.png" />
+                            DVD</a></li>
+                        <li><a href="WorkerStats.aspx">
+                            <img width="28" height="28" src="Assets/Images/Worker.png" />
+                            Worker</a></li>
+                        <li><a href="Stats.aspx">
+                            <img width="28" height="28" src="Assets/Images/General.png" />
+                            General</a></li>
+                    </ul>
+                </li>
+                <!--
+                -->
+            </ul>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="error" id="divError" runat="server">
+            <asp:Label runat="server" ID="lblError" />
+        </div>
+        <div class="warning" id="divWarning" runat="server">
+            <asp:Label runat="server" ID="lblWarning" />
+        </div>
+        <div class="info" id="divInfo" runat="server">
+            <asp:Label runat="server" ID="lblInfo" />
+        </div>
+        <div class="success" id="divSuccess" runat="server">
+            <asp:Label runat="server" ID="lblSuccess" />
+        </div>
+        <asp:ContentPlaceHolder ID="body" runat="server">
+        </asp:ContentPlaceHolder>
+    </div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true" CodeFile="ProductHistory.aspx.cs" Inherits="ProductHistory" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajax" %>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="body" runat="Server">
+    <form runat="server">
+
+            <asp:GridView ID="gvWeeklyReportsProduct" runat="server" AutoGenerateColumns="false" AllowPaging="true" AllowSorting="false" PageSize="20"
+            DataSourceID="sqlProductStats" BorderWidth="1px">
+            <PagerStyle CssClass="pager-row" />
+            <EditRowStyle CssClass="edit-row" />
+            <SortedAscendingCellStyle CssClass="Asc_Des_Cell" />
+            <SortedAscendingHeaderStyle CssClass="Asc_Des_Header" />
+            <SortedDescendingCellStyle CssClass="Asc_Des_Cell" />
+            <SortedDescendingHeaderStyle CssClass="Asc_Des_Header" />
+            <Columns>
+                <asp:BoundField DataField="name" HeaderText="Name" />
+                <asp:BoundField DataField="price" HeaderText="Price" DataFormatString="{0:C}" />
+                <asp:BoundField DataField="Inventory" HeaderText="Inventory" />
+                <asp:BoundField DataField="TotalCount" HeaderText="Total Transactions" />
+                <asp:BoundField DataField="TotalAmount" HeaderText="Total Quantity Sold" />
+                <asp:BoundField DataField="lastSold" HeaderText="Last Sold" />
+            </Columns>
+        </asp:GridView>
+        <asp:SqlDataSource ID="sqlProductStats" runat="server" SelectCommandType="StoredProcedure" SelectCommand="ProductStatsForHall">
+            <SelectParameters>
+                <asp:SessionParameter Name="hallID" SessionField="hall" DefaultValue="-1" />
+            </SelectParameters>
+        </asp:SqlDataSource>
+
+    </form>
+</asp:Content>

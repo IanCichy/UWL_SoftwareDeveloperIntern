@@ -1,0 +1,537 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace FDS
+{
+    public class Pizza : Product
+    {
+        #region Constants
+
+        private const bool PizzasAreWeeklyAccountable = true;
+
+        #endregion Constants
+
+        #region Properties
+
+        public int PizzaId;
+        public String Brand;
+
+        public int ProductID;
+        public int Quantity;
+        public String Reason;
+        public String EagleID;
+
+        #endregion Properties
+
+        #region Public Static Methods
+
+        /// <summary>
+        /// Adds a new pizza, returns null if pizza or product with name and hall already exists
+        /// </summary>
+        /// <param name="name">Name of pizza</param>
+        /// <param name="brand">Brand of pizza</param>
+        /// <param name="hall">Hall of pizza</param>
+        /// <param name="price">Price of pizza</param>
+        /// <param name="active">Is pizza active?</param>
+        /// <returns>New pizza, null if a product or pizza with this name and hall already exists</returns>
+        public static Pizza AddPizza(String name, String brand, Hall hall, decimal price, int inventory, bool active)
+        {
+            // Check to see if a pizza with this name and hall already exists, if so, return null
+
+            //if (GetPizzaByBrandNameAndHall(brand, name, hall) != null) return null;
+
+            // Add a product corresponding to this pizza
+            var product = AddProduct(String.Format("{0}-{1}", brand, name), hall, price, inventory, active, PizzasAreWeeklyAccountable);
+
+            // If product already exists, also return null
+            if (product == null) return null;
+
+            // Create an insert command
+            var command = new SqlCommand(
+                "INSERT INTO Pizzas VALUES (@productID, @brand)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("productID", product.ProductId));
+            command.Parameters.Add(new SqlParameter("brand", brand));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            // Get the newly added pizza and return it
+            return GetPizzaByBrandNameAndHall(brand, name, hall);
+        }
+
+        public static void ProgramPizza(int ProductID, Hall hall, String EagleID, int Quantity, String Reason)
+        {
+            // Create an insert command
+            var command = new SqlCommand(
+                "INSERT INTO ProgramPizzas VALUES (@productID, @hall, @EagleID, @Quantity, @Reason, @Date)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("productID", ProductID));
+            command.Parameters.Add(new SqlParameter("hall", hall.HallId));
+            command.Parameters.Add(new SqlParameter("EagleID", EagleID));
+            command.Parameters.Add(new SqlParameter("Quantity", Quantity));
+            command.Parameters.Add(new SqlParameter("Reason", Reason));
+            command.Parameters.Add(new SqlParameter("Date", DateTime.Now));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            ProgramUpdate(ProductID, Quantity);
+        }
+
+        public static void ProgramUpdate(int ProductID, int Inventory)
+        {
+            // Create an insert command
+            var command = new SqlCommand(
+                "UPDATE products SET inventory=@Inventory where ProductID=@ProductID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("productID", ProductID));
+            command.Parameters.Add(new SqlParameter("Inventory", Inventory));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+        }
+
+        public static int ProgramCount(int ProductID)
+        {
+            // Create the command
+            var Query =
+                new SqlCommand("SELECT Inventory FROM Products where ProductID=@ProductID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            Query.Parameters.Add(new SqlParameter("ProductID", ProductID));
+
+            // Execute the command
+            Query.Connection.Open();
+            var Inventory = (int)Query.ExecuteScalar();
+            Query.Connection.Close();
+            return Inventory;
+        }
+
+        /// <summary>
+        /// Deletes a Pizza as determined by the given product ID
+        /// </summary>
+        /// <param name="productId">Product ID of product to find</param>
+        public static Pizza DeletePizza(int productId)
+        {
+            // Create the command
+            var command =
+                new SqlCommand("Delete FROM Pizzas WHERE productID=@productId")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("productId", productId));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            // Create the command
+            var command2 =
+                new SqlCommand("Delete FROM Products WHERE productID=@productId")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command2.Parameters.Add(new SqlParameter("productId", productId));
+
+            // Execute the command
+            command2.Connection.Open();
+            command2.ExecuteNonQuery();
+            command2.Connection.Close();
+
+            return null;
+        }
+
+        /// <summary>
+
+        /// <summary>
+        /// Gets a pizza by the given pizzaId. If none exist, return null
+        /// </summary>
+        /// <param name="pizzaId">PizzaID of pizza to find</param>
+        /// <returns>Pizza with corresponding pizzaId, null if none exist</returns>
+        public static Pizza GetPizzaByPizzaId(int pizzaId)
+        {
+            // Create command
+            var command = new SqlCommand(
+                "SELECT * FROM Pizzas WHERE pizzaID=@pizzaID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("pizzaID", pizzaId));
+
+            // Execute command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            if (!reader.Read())
+            {
+                // No pizza with this ID was found, return null
+                return null;
+            }
+
+            // Load pizza things
+            var productId = int.Parse(String.Format("{0}", reader["productID"]));
+            var brand = String.Format("{0}", reader["brand"]);
+            pizzaId = int.Parse(String.Format("{0}", reader["pizzaID"]));
+
+            // Load product
+            var product = GetProductByProductId(productId);
+
+            var pizza = new Pizza
+            {
+                PizzaId = pizzaId,
+                Brand = brand,
+                ProductId = product.ProductId,
+                Hall = product.Hall,
+                Name = product.Name,
+                Inventory = product.Inventory,
+                Price = product.Price,
+                IsActive = product.IsActive,
+                IsWeeklyAccountable = product.IsWeeklyAccountable
+            };
+            return pizza;
+        }
+
+        /// <summary>
+        /// Gets a pizza by its name and hall
+        /// </summary>
+        /// <param name="brand">Brand of pizza</param>
+        /// <param name="name">Name of pizza</param>
+        /// <param name="hall">Hall of pizza</param>
+        /// <returns>Pizza if one is found, null otherwise</returns>
+        public static Pizza GetPizzaByBrandNameAndHall(string brand, string name, Hall hall)
+        {
+            // Create command
+            var command =
+                new SqlCommand("SELECT * FROM Products WHERE name LIKE @name AND hallID=@hallId")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("name", String.Format("{0}-{1}", brand, name)));
+            command.Parameters.Add(new SqlParameter("hallID", hall.HallId));
+
+            // Execute command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            if (!reader.Read())
+            {
+                // No pizza with this ID was found, return null
+                return null;
+            }
+
+            // Load pizza things
+            var productId = int.Parse(String.Format("{0}", reader["productID"]));
+            var Pizzabrand = String.Format("{0}", reader["brand"]);
+            var pizzaId = int.Parse(String.Format("{0}", reader["pizzaID"]));
+
+            // Load product
+            var product = GetProductByProductId(productId);
+
+            var pizza = new Pizza
+            {
+                PizzaId = pizzaId,
+                Brand = Pizzabrand,
+                ProductId = product.ProductId,
+                Hall = product.Hall,
+                Name = product.Name,
+                Inventory = product.Inventory,
+                Price = product.Price,
+                IsActive = product.IsActive,
+                IsWeeklyAccountable = product.IsWeeklyAccountable
+            };
+            return pizza;
+        }
+
+        /// <summary>
+        /// Gets a list of all pizzas
+        /// </summary>
+        /// <returns>List of all pizzas</returns>
+        public static List<Pizza> GetAllPizzas()
+        {
+            // Set up commmand
+            var command = new SqlCommand(
+                "SELECT * FROM Pizzas")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+
+            // Execute command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Create list of pizzas
+            var pizzas = new List<Pizza>();
+
+            // For each row, make a pizza and add it to the list
+            while (reader.Read())
+            {
+                var pizza = new Pizza
+                {
+                    PizzaId = int.Parse(String.Format("{0}", reader["pizzaID"])),
+                    Brand = String.Format("{0}", reader["brand"]),
+                    ProductId = int.Parse(String.Format("{0}", reader["productID"])),
+                    Hall = Hall.GetHallById(int.Parse(String.Format("{0}", reader["hallID"]))),
+                    Name = String.Format("{0}", reader["name"]),
+                    Inventory = int.Parse(String.Format("{0}", reader["inventory"])),
+                    Price = decimal.Parse(String.Format("{0}", reader["price"])),
+                    IsActive = bool.Parse(String.Format("{0}", reader["isActive"])),
+                    IsWeeklyAccountable = bool.Parse(String.Format("{0}", reader["isWeeklyAccountable"]))
+                };
+                pizzas.Add(pizza);
+            }
+
+            // Return the list
+            return pizzas;
+        }
+
+        /// <summary>
+        /// Gets a list of all pizzas for the given hall
+        /// </summary>
+        /// <param name="hall">Hall to find pizzas for</param>
+        /// <returns>List of pizzas for hall</returns>
+        public static List<Pizza> GetAllPizzasForHall(Hall hall)
+        {
+            // Set up commmand
+            var command = new SqlCommand(
+                "SELECT * FROM Pizzas P, Products O where O.aproductID = P.productID and hallID=@hallId")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("hallID", hall.HallId));
+
+            // Execute command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Create list of pizzas
+            var pizzas = new List<Pizza>();
+
+            // For each row, make a pizza and add it to the list
+            while (reader.Read())
+            {
+                var pizza = new Pizza
+                {
+                    PizzaId = int.Parse(String.Format("{0}", reader["pizzaID"])),
+                    Brand = String.Format("{0}", reader["brand"]),
+                    ProductId = int.Parse(String.Format("{0}", reader["productID"])),
+                    Hall = Hall.GetHallById(int.Parse(String.Format("{0}", reader["hallID"]))),
+                    Name = String.Format("{0}", reader["name"]),
+                    Inventory = int.Parse(String.Format("{0}", reader["inventory"])),
+                    Price = decimal.Parse(String.Format("{0}", reader["price"])),
+                    IsActive = bool.Parse(String.Format("{0}", reader["isActive"])),
+                    IsWeeklyAccountable = bool.Parse(String.Format("{0}", reader["isWeeklyAccountable"]))
+                };
+                pizzas.Add(pizza);
+            }
+
+            // Return the list
+            return pizzas;
+        }
+
+        #endregion Public Static Methods
+
+        #region FDM# methods
+
+        
+        public static int getPizzaInventory(int ProductID)
+        {
+            // Create the command
+            var Query =
+                new SqlCommand("SELECT Inventory FROM Products where ProductID=@ProductID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            Query.Parameters.Add(new SqlParameter("ProductID", ProductID));
+
+            // Execute the command
+            Query.Connection.Open();
+            var Inventory = (int)Query.ExecuteScalar();
+            Query.Connection.Close();
+            return Inventory;
+        }
+        
+
+        /*
+         * Method for FDM3 to add and sell pizzas
+        */
+
+        public static void PizzaSell(int Inventory, int ProductID, int ShiftID, int EmployeeID, int isCredit, String CreditReason, decimal Cost, int Amount)
+        {
+            // Create an insert command
+            var updateInventory = new SqlCommand(
+                "UPDATE products SET inventory=@Inventory where ProductID=@ProductID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            updateInventory.Parameters.Add(new SqlParameter("productID", ProductID));
+            updateInventory.Parameters.Add(new SqlParameter("Inventory", Inventory));
+
+            // Execute command
+            updateInventory.Connection.Open();
+            updateInventory.ExecuteNonQuery();
+            updateInventory.Connection.Close();
+
+            // Create an insert command
+            var updateSales = new SqlCommand(
+                "INSERT INTO Sales VALUES(@productID, @shiftID, @employeeID, @soldOn, @isCredit, @CreditReason, @Cost, @Amount)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            updateSales.Parameters.Add(new SqlParameter("productID", ProductID));
+            updateSales.Parameters.Add(new SqlParameter("shiftID", ShiftID));
+            updateSales.Parameters.Add(new SqlParameter("employeeID", EmployeeID));
+            updateSales.Parameters.Add(new SqlParameter("isCredit", isCredit));
+
+            updateSales.Parameters.Add(new SqlParameter("CreditReason", CreditReason));
+            updateSales.Parameters.Add(new SqlParameter("Cost", Cost));
+
+            updateSales.Parameters.Add(new SqlParameter("soldOn", DateTime.Now));
+            updateSales.Parameters.Add(new SqlParameter("Amount", Amount));
+
+            // Execute command
+            updateSales.Connection.Open();
+            updateSales.ExecuteNonQuery();
+            updateSales.Connection.Close();
+        }
+
+        /*
+         * Method for FDM3 to add and sell pizzas
+        */
+
+        public static void PizzaAdd(int Inventory, int ProductID, int change, int EmployeeID, String Reason, int ShiftID)
+        {
+            // Create an insert command
+            var updateInventory = new SqlCommand(
+                "UPDATE products SET inventory=@Inventory where ProductID=@ProductID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            updateInventory.Parameters.Add(new SqlParameter("productID", ProductID));
+            updateInventory.Parameters.Add(new SqlParameter("Inventory", Inventory));
+
+            // Execute command
+            updateInventory.Connection.Open();
+            updateInventory.ExecuteNonQuery();
+            updateInventory.Connection.Close();
+
+            // Create an insert command
+            var inventoryChange = new SqlCommand(
+                "INSERT INTO InventoryChanges VALUES(@productID, @Change, @changedBy, @changedOn, @Reason, @shiftID)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            inventoryChange.Parameters.Add(new SqlParameter("productID", ProductID));
+            inventoryChange.Parameters.Add(new SqlParameter("Change", change));
+            inventoryChange.Parameters.Add(new SqlParameter("changedBy", EmployeeID));
+            inventoryChange.Parameters.Add(new SqlParameter("changedOn", DateTime.Now));
+            inventoryChange.Parameters.Add(new SqlParameter("Reason", Reason));
+            inventoryChange.Parameters.Add(new SqlParameter("shiftID", ShiftID));
+
+            // Execute command
+            inventoryChange.Connection.Open();
+            inventoryChange.ExecuteNonQuery();
+            inventoryChange.Connection.Close();
+        }
+
+        #endregion FDM# methods
+
+        #region Public Non-Static Methods
+
+        /// <summary>
+        /// Sets the brand in the database and locally. If the local brand didn't change, then it
+        /// has not changed in the database
+        /// </summary>
+        /// <param name="brand">New brand for pizza</param>
+        public void SetBrand(String brand)
+        {
+            // Set up insert command
+            var command =
+                new SqlCommand("UPDATE Pizzas SET brand=@brand WHERE pizzaID=@pizzaID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("brand", brand));
+            command.Parameters.Add(new SqlParameter("pizzaID", PizzaId));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            // Set the name to the name in the database
+            Brand = GetPizzaByPizzaId(PizzaId).Brand;
+            SetName(Name);
+        }
+
+        /// <summary>
+        /// Destroys this pizza, product, inventory changes, and sales. WARNING: PROBABLY SHOULD NOT
+        /// BE USED EXCEPT IN TESTING
+        /// </summary>
+        public new void Destroy()
+        {
+            // Set up delete command
+            var command =
+                new SqlCommand("DELETE FROM InventoryChanges WHERE productID=@productID; DELETE FROM Sales WHERE productID=@productID; DELETE FROM Pizzas WHERE productID=@productID; DELETE FROM Products WHERE productID=@productID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("productID", ProductId));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+        }
+
+        /// <summary>
+        /// Sets the name of the pizza locally and in the database. If the local value does not
+        /// change, the database value has not changed.
+        /// </summary>
+        /// <param name="name">New name of pizza</param>
+        public new void SetName(String name)
+        {
+            base.SetName(String.Format("{0}-{1}", Brand, name));
+        }
+
+        public String GetPizzaName()
+        {
+            return Name.Substring(Name.IndexOf('-') + 1);
+        }
+
+        #endregion Public Non-Static Methods
+    }
+}

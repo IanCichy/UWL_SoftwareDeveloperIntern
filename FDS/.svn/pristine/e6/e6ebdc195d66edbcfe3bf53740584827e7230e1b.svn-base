@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+
+  <configSections>
+    <section name="dotless" type="dotless.Core.configuration.DotlessConfigurationSectionHandler,dotless.Core" />
+    <!-- For more information on Entity Framework configuration, visit http://go.microsoft.com/fwlink/?LinkID=237468 -->
+    <section name="entityFramework"
+      type="System.Data.Entity.Internal.ConfigFile.EntityFrameworkSection, EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+      requirePermission="false" />
+  </configSections>
+
+  <system.web>
+    <sessionState timeout="30" />
+
+    <compilation debug="true" targetFramework="4.5">
+      <assemblies>
+        <add assembly="System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A" />
+        <add assembly="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089" />
+        <add assembly="System.Web.Extensions.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+        <add assembly="System.Web.DataVisualization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+      </assemblies>
+    </compilation>
+
+    <httpRuntime targetFramework="4.5" />
+    <customErrors mode="Off" />
+    <webServices>
+      <protocols>
+        <add name="HttpSoap" />
+        <add name="HttpPost" />
+        <add name="HttpGet" />
+        <add name="HttpPostLocalhost" />
+        <!-- Documentation enables the documentation/test pages -->
+        <add name="Documentation" />
+      </protocols>
+    </webServices>
+  </system.web>
+
+  <entityFramework>
+    <defaultConnectionFactory type="System.Data.Entity.Infrastructure.LocalDbConnectionFactory, EntityFramework">
+      <parameters>
+        <parameter value="v11.0" />
+      </parameters>
+    </defaultConnectionFactory>
+  </entityFramework>
+
+  <!--
+  <system.webServer>
+    <rewrite>
+      <rules>
+        <clear />
+        <rule name="Redirect to https" stopProcessing="true">
+          <match url="(.*)" />
+          <conditions>
+            <add input="{HTTPS}" pattern="off" ignoreCase="true" />
+          </conditions>
+          <action type="Redirect" url="https://{HTTP_HOST}{REQUEST_URI}" redirectType="Permanent" appendQueryString="false" />
+        </rule>
+      </rules>
+    </rewrite>
+  </system.webServer>
+-->
+
+</configuration>

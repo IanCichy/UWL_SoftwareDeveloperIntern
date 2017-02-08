@@ -1,0 +1,103 @@
+﻿using FDS;
+using System;
+using System.Web.UI.WebControls;
+
+public partial class Index : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["username"] == null)
+        {
+            Response.Redirect("login.aspx");
+            return;
+        }
+
+        if (Session["hall"] == null)
+        {
+            Session["warning"] = "No hall chosen. Please choose a hall";
+            Response.Redirect("chooseHall.aspx");
+            return;
+        }
+
+        var dc = Employee.GetEmployeeByEagleId(String.Format("{0}", Session["username"]));
+        Session["info"] = "Welcome to DC WEB " + dc.EagleId.ToString();
+
+        var hall = Hall.GetHallById(int.Parse(String.Format("{0}", Session["hall"])));
+
+        var headers = new TableHeaderRow();
+        headers.Cells.Add(new TableHeaderCell { Text = "Eagle ID" });
+        headers.Cells.Add(new TableHeaderCell { Text = "Options" });
+        tblEmployees.Rows.Add(headers);
+
+        var employees = Employee.GetEmployeesOfHall(hall);
+
+        foreach (var employee in employees)
+        {
+            var row = new TableRow();
+            var eagleIdCell = new TableCell { Text = employee.EagleId };
+            var optionsCell = new TableCell();
+            var removeEmployeeButton = new Button
+            {
+                Text = "Remove Employee",
+                ID = String.Format("btnRemoveEmployee{0}", employee.GetEmployeeId())
+            };
+            removeEmployeeButton.Click += removeEmployeeButton_OnClick;
+            optionsCell.Controls.Add(removeEmployeeButton);
+            if (dc.IsAdmin())
+            {
+                var makeDCButton = new Button
+                {
+                    Text = employee.IsDCOfHall(hall) ? "Make not DC" : "Make DC",
+                    ID = String.Format("btnAddDC{0}", employee.GetEmployeeId())
+                };
+                makeDCButton.Click += makeDCButton_OnClick;
+                optionsCell.Controls.Add(makeDCButton);
+            }
+            row.Cells.Add(eagleIdCell);
+            row.Cells.Add(optionsCell);
+            tblEmployees.Rows.Add(row);
+        }
+    }
+
+    private void removeEmployeeButton_OnClick(object sender, EventArgs e)
+    {
+        var button = (Button)sender;
+        var employeeId = int.Parse(button.ID.Substring(17));
+        var employee = Employee.GetEmployeeByEmployeeId(employeeId);
+        var hall = Session["hall"] == null ? null : Hall.GetHallById(int.Parse(String.Format("{0}", Session["hall"])));
+        if (hall == null || employee == null)
+        {
+            Session["error"] = "This hall or employee were not found.";
+            return;
+        }
+        employee.RemoveEmployeeFromHall(hall);
+        Response.Redirect(Request.RawUrl);
+    }
+
+    private void makeDCButton_OnClick(object sender, EventArgs e)
+    {
+        var button = (Button)sender;
+        var employeeId = int.Parse(button.ID.Substring(8));
+        var employee = Employee.GetEmployeeByEmployeeId(employeeId);
+        var hall = Session["hall"] == null ? null : Hall.GetHallById(int.Parse(String.Format("{0}", Session["hall"])));
+        if (hall == null || employee == null)
+        {
+            Session["error"] = "This hall or employee were not found.";
+            return;
+        }
+        if (employee.IsDCOfHall(hall))
+        {
+            employee.RemoveDCFromHall(hall);
+        }
+        else
+        {
+            employee.MakeDCOfHall(hall);
+        }
+        Response.Redirect(Request.RawUrl);
+    }
+
+    public void btnAddEmployee_Click(object sender, EventArgs e)
+    {
+        Response.Redirect("AddEmployee.aspx");
+    }
+}

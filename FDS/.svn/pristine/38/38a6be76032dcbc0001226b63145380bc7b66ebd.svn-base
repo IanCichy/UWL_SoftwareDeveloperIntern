@@ -1,0 +1,30 @@
+﻿<?xml version="1.0"?>
+<configuration>
+  <configSections>
+    <section name="dotless" type="dotless.Core.configuration.DotlessConfigurationSectionHandler,dotless.Core" />
+  </configSections>
+  <system.web>
+    <compilation debug="true" targetFramework="4.5">
+      <assemblies>
+        <add assembly="System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B03F5F7F11D50A3A"/>
+        <add assembly="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089"/>
+        <add assembly="System.Web.Extensions.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+      </assemblies>
+    </compilation>
+    <httpRuntime targetFramework="4.5"/>
+    <customErrors mode="Off"/>
+    <webServices>
+      <protocols>
+        <add name="HttpSoap"/>
+        <add name="HttpPost"/>
+        <add name="HttpGet"/>
+        <add name="HttpPostLocalhost"/>
+        <!-- Documentation enables the documentation/test pages -->
+        <add name="Documentation"/>
+      </protocols>
+    </webServices>
+    <!--<httpHandlers>
+      <add type="dotless.Core.LessCssHttpHandler,dotless.Core" validate="false" path="*.LESS" verb="*" />
+    </httpHandlers>-->
+  </system.web>
+</configuration>

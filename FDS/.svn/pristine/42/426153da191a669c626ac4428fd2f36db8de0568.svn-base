@@ -1,0 +1,551 @@
+﻿#region
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+
+#endregion
+
+namespace FDS
+{
+    public class Equipment
+    {
+        #region Properties
+
+        public String Category;
+        public String Condition;
+        public int EquipmentId;
+        public Hall Hall;
+        public String Name;
+        public String Status;
+
+        #endregion
+
+        #region Public Static Methods
+
+        /// <summary>
+        ///     Returns a piece of equipment with the corresponding equipment ID
+        /// </summary>
+        /// <param name="equipmentId">Equipment ID of equipment to return</param>
+        /// <returns>Equipment with corresponding equipment ID</returns>
+        public static Equipment GetEquipmentById(int equipmentId)
+        {
+            // Create a new command
+            var command = new SqlCommand("SELECT * FROM [dbo].[EquipmentWithStatusAndCondition] () WHERE equipmentID=@equipmentID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("equipmentID", equipmentId));
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Read the results and return the first equipment
+            if (reader.Read())
+            {
+                var equipment = new Equipment
+                {
+                    EquipmentId = int.Parse(String.Format("{0}", reader["equipmentID"])),
+                    Hall = Hall.GetHallById(int.Parse(String.Format("{0}", reader["hallID"]))),
+                    Category = String.Format("{0}", reader["category"]),
+                    Status = String.Format("{0}", reader["status"]),
+                    Condition = String.Format("{0}", reader["condition"])
+                };
+                reader.Close();
+                command.Connection.Close();
+                return equipment;
+            }
+            // if there is no result, return null
+            reader.Close();
+            command.Connection.Close();
+            return null;
+        }
+
+        /// <summary>
+        /// Deletes Equipment as determined by the given Equipment ID
+        /// </summary>
+        /// <param name="EquipmentId">Equipment ID of Equipment to find</param>
+        public static Equipment DeleteEquipment(int EquipmentId)
+        {
+            // Create the command
+            var command =
+                new SqlCommand("Delete FROM Equipment WHERE EquipmentId=@EquipmentId")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("EquipmentId", EquipmentId));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+
+            return null;
+        }
+
+        /// <summary>
+
+        /// <summary>
+        ///     Returns a Dictionary of all possible equipment statuses
+        /// </summary>
+        /// <returns>Dictionary with pairs corresponding to (Status description, Status code)</returns>
+        public static Dictionary<String, int> GetPossibleStatuses()
+        {
+            // Create a new command
+            var command = new SqlCommand("SELECT * FROM Status")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            var statuses = new Dictionary<String, int>();
+
+            while (reader.Read())
+            {
+                statuses.Add(String.Format("{0}", reader["description"]),
+                    int.Parse(String.Format("{0}", reader["status"])));
+            }
+
+            reader.Close();
+            command.Connection.Close();
+            return statuses;
+        }
+
+        /// <summary>
+        ///     Returns a Dictionary of all possible equipment conditions
+        /// </summary>
+        /// <returns>Dictionary with pairs corresponding to (Condition description, Condition code)</returns>
+        public static Dictionary<String, int> GetPossibleConditions()
+        {
+            // Create a new command
+            var command = new SqlCommand("SELECT * FROM Condition")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            var conditions = new Dictionary<String, int>();
+
+            while (reader.Read())
+            {
+                conditions.Add(String.Format("{0}", reader["description"]),
+                    int.Parse(String.Format("{0}", reader["condition"])));
+            }
+
+            reader.Close();
+            command.Connection.Close();
+            return conditions;
+        }
+
+        /// <summary>
+        ///     Creates a new piece of equipment
+        /// </summary>
+        /// <param name="hall">Hall to add equipment to</param>
+        /// <param name="name">Name of equipment to add</param>
+        /// <param name="category">Category to add equipment to</param>
+        /// <returns>The newly created piece of equipment, null if equipment with name already exists in hall</returns>
+        public static Equipment CreateEquipment(Hall hall, String name, String category)
+        {
+            // Check if equipment with name is already in hall, if so return null
+            if (GetEquipmentByHallAndName(hall, name) != null) return null;
+            var command = new SqlCommand("INSERT INTO Equipment VALUES (@hallID, @name, @category, 0, 1)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("hallID", hall.HallId));
+            command.Parameters.Add(new SqlParameter("name", name));
+            command.Parameters.Add(new SqlParameter("category", category));
+
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+
+            return GetEquipmentByHallAndName(hall, name);
+        }
+
+        /// <summary>
+        ///     Gets the last added equipment by Hall and Name
+        /// </summary>
+        /// <param name="hall">Hall of equipment to get</param>
+        /// <param name="name">Name of equipment to get</param>
+        /// <returns>Equipment with corresponding hall and name</returns>
+        public static Equipment GetEquipmentByHallAndName(Hall hall, String name)
+        {
+            // Create a new command
+            var command =
+                new SqlCommand("SELECT * FROM GetEquipmentByNameAndHall ( @hallID, @name ) ORDER BY equipmentID DESC")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("hallID", hall.HallId));
+            command.Parameters.Add(new SqlParameter("name", name));
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Read the results and return the first equipment
+            if (reader.Read())
+            {
+                var equipment = new Equipment
+                {
+                    EquipmentId = int.Parse(String.Format("{0}", reader["equipmentID"])),
+                    Hall = Hall.GetHallById(int.Parse(String.Format("{0}", reader["hallID"]))),
+                    Category = String.Format("{0}", reader["category"]),
+                    Status = String.Format("{0}", reader["status"]),
+                    Condition = String.Format("{0}", reader["condition"])
+                };
+                reader.Close();
+                command.Connection.Close();
+                return equipment;
+            }
+            // if there is no result, return null
+            reader.Close();
+            command.Connection.Close();
+            return null;
+        }
+
+        /// <summary>
+        ///     Returns a list of all the equipment from a given hall
+        /// </summary>
+        /// <param name="hall"></param>
+        /// <returns></returns>
+        public static List<Equipment> GetEquipmentByHall(Hall hall)
+        {
+            // Create a new command
+            var command = new SqlCommand("SELECT * FROM [dbo].[EquipmentWithStatusAndCondition] () WHERE hallID=@hallID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("hallID", hall.HallId));
+
+            // Execute the command
+            command.Connection.Open();
+            var reader = command.ExecuteReader();
+
+            // Create a list to store all the quipment
+            var hallEquipment = new List<Equipment>();
+
+            // Read the results and add each to the equipment list
+            while (reader.Read())
+            {
+                var equipment = new Equipment
+                {
+                    EquipmentId = int.Parse(String.Format("{0}", reader["equipmentID"])),
+                    Hall = Hall.GetHallById(int.Parse(String.Format("{0}", reader["hallID"]))),
+                    Category = String.Format("{0}", reader["category"]),
+                    Status = String.Format("{0}", reader["status"]),
+                    Condition = String.Format("{0}", reader["condition"])
+                };
+                hallEquipment.Add(equipment);
+            }
+
+            reader.Close();
+            command.Connection.Close();
+            return hallEquipment;
+        }
+
+        /// <summary>
+        ///    Checks in and out equipment in FDM3
+        ///    1=in, 0=out
+        /// </summary>
+        /// <param name="status">New status</param>
+        public static void CheckOut(int EquipmentID, int Hallid, int status, String StudentID, String Condition, String UserID)
+        {
+            // create a command
+            var statusChange = new SqlCommand("UPDATE Equipment SET status = @status WHERE equipmentID=@equipmentID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            statusChange.Parameters.Add(new SqlParameter("equipmentID", EquipmentID));
+            statusChange.Parameters.Add(new SqlParameter("status", status));
+
+            // Execute the command
+            statusChange.Connection.Open();
+            statusChange.ExecuteNonQuery();
+            statusChange.Connection.Close();
+
+            // create a command
+            var UpdateCheckOut = new SqlCommand("INSERT INTO EquipmentCheckOut VALUES (@equipmentID, @studentID, @HallID, @userOut, NULL, @dateCheckedOut, NULL, @conditionOut, NULL)")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            UpdateCheckOut.Parameters.Add(new SqlParameter("equipmentID", EquipmentID));
+            UpdateCheckOut.Parameters.Add(new SqlParameter("studentID", StudentID));
+            UpdateCheckOut.Parameters.Add(new SqlParameter("HallID", Hallid));
+            UpdateCheckOut.Parameters.Add(new SqlParameter("conditionOut", Condition));
+            UpdateCheckOut.Parameters.Add(new SqlParameter("dateCheckedOut", DateTime.Now));
+            UpdateCheckOut.Parameters.Add(new SqlParameter("userOut", UserID));
+
+            // Execute the command
+            UpdateCheckOut.Connection.Open();
+            UpdateCheckOut.ExecuteNonQuery();
+            UpdateCheckOut.Connection.Close();
+        }
+
+        /// <summary>
+        ///    Checks in and out equipment in FDM3
+        ///    1=in, 0=out
+        /// </summary>
+        /// <param name="status">New status</param>
+        public static void CheckIn(int EquipmentID, int status, string conditionIn, String UserID)
+        {
+            // create a command
+            var statusChange = new SqlCommand("UPDATE Equipment SET status = @status, condition = @condition WHERE equipmentID=@equipmentID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            statusChange.Parameters.Add(new SqlParameter("equipmentID", EquipmentID));
+            statusChange.Parameters.Add(new SqlParameter("status", status));
+            if (conditionIn.Equals("poor"))
+            {
+                statusChange.Parameters.Add(new SqlParameter("condition", "1"));
+            }
+            else if (conditionIn.Equals("damaged"))
+            {
+                statusChange.Parameters.Add(new SqlParameter("condition", "2"));
+            }
+            else
+            {
+                statusChange.Parameters.Add(new SqlParameter("condition", "0"));
+            }
+
+            // Execute the command
+            statusChange.Connection.Open();
+            statusChange.ExecuteNonQuery();
+            statusChange.Connection.Close();
+
+            // create a command
+            var UpdateCheckOut = new SqlCommand("UPDATE EquipmentCheckOut SET dateCheckedIn = @DateCheckedIn, conditionIn = @ConditionIn, userIn = @UserIn WHERE equipmentID=@EquipmentID AND dateCheckedIn IS NULL")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            UpdateCheckOut.Parameters.Add(new SqlParameter("EquipmentID", EquipmentID));
+            UpdateCheckOut.Parameters.Add(new SqlParameter("ConditionIn", conditionIn));
+            UpdateCheckOut.Parameters.Add(new SqlParameter("DateCheckedIn", DateTime.Now));
+            UpdateCheckOut.Parameters.Add(new SqlParameter("UserIn", UserID));
+
+            // Execute the command
+            UpdateCheckOut.Connection.Open();
+            UpdateCheckOut.ExecuteNonQuery();
+            UpdateCheckOut.Connection.Close();
+        }
+
+        public static void SelectItem(int EquipmentID)
+        {
+            // create a command
+            var statusChange = new SqlCommand("UPDATE Equipment SET status = -1 WHERE equipmentID=@equipmentID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            statusChange.Parameters.Add(new SqlParameter("equipmentID", EquipmentID));
+
+            // Execute the command
+            statusChange.Connection.Open();
+            statusChange.ExecuteNonQuery();
+            statusChange.Connection.Close();
+        }
+
+        public static void UnselectItem(int EquipmentID)
+        {
+            // create a command
+            var statusChange = new SqlCommand("UPDATE Equipment SET status = 1 WHERE equipmentID=@equipmentID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            statusChange.Parameters.Add(new SqlParameter("equipmentID", EquipmentID));
+
+            // Execute the command
+            statusChange.Connection.Open();
+            statusChange.ExecuteNonQuery();
+            statusChange.Connection.Close();
+        }
+
+        public static void DamagedEquipmentEmail(String HallName, String equipName, String ConditionIn, String ConditionOut, String StudentFrom, String NetID)
+        {
+            // Set up command
+            var command =
+                new SqlCommand("DamagedEquipmentEmail")
+                {
+                    CommandType = CommandType.StoredProcedure,
+                    Connection = Connections.FDSConnection()
+                };
+            command.Parameters.Add(new SqlParameter("Hall", HallName));
+            command.Parameters.Add(new SqlParameter("Name", equipName));
+            command.Parameters.Add(new SqlParameter("Cin", ConditionIn));
+            command.Parameters.Add(new SqlParameter("Cout", ConditionOut));
+            command.Parameters.Add(new SqlParameter("Student", StudentFrom));
+            command.Parameters.Add(new SqlParameter("Worker", NetID));
+
+            // Execute command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+            command.Connection.Close();
+        }
+
+        #endregion
+
+        #region Public Non-Static Methods
+
+        /// <summary>
+        ///     Removes the equipment from the database -- BE CAREFUL: PROBABLY ONLY USE DURING TESTING
+        /// </summary>
+        public void Destroy()
+        {
+            var command = new SqlCommand("DELETE FROM Equipment WHERE equipmentID=@EquipmentID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("EquipmentID", EquipmentId));
+
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+        }
+
+        /// <summary>
+        ///     Sets the condition locally and in the database
+        /// </summary>
+        /// <param name="condition">New condition</param>
+        public void SetCondition(String condition)
+        {
+            var conditions = GetPossibleConditions();
+
+            // use lower case
+            condition = condition.ToLower();
+
+            // Only update the condition if it is a valid condition (in the Condition table)
+            if (conditions.ContainsKey(condition))
+            {
+                var conditionCode = conditions[condition];
+
+                // create a command
+                var command =
+                    new SqlCommand("UPDATE Equipment SET condition = @conditionCode WHERE equipmentID=@equipmentID")
+                    {
+                        CommandType = CommandType.Text,
+                        Connection = Connections.FDSConnection()
+                    };
+                command.Parameters.Add(new SqlParameter("equipmentID", EquipmentId));
+                command.Parameters.Add(new SqlParameter("conditionCode", conditionCode));
+
+                // Execute the command
+                command.Connection.Open();
+                command.ExecuteNonQuery();
+
+                command.Connection.Close();
+
+                // After the execution of the command, set the local condition
+                Condition = condition;
+            }
+        }
+
+        /// <summary>
+        ///     Sets the status locally and in the database
+        /// </summary>
+        /// <param name="status">New status</param>
+        public void SetStatus(String status)
+        {
+            var statuses = GetPossibleStatuses();
+
+            // use lower case
+            status = status.ToLower();
+
+            // Only update the condition if it is a valid condition (in the Condition table)
+            if (statuses.ContainsKey(status))
+            {
+                var statusCode = statuses[status];
+
+                // create a command
+                var command = new SqlCommand("UPDATE Equipment SET status = @statusCode WHERE equipmentID=@equipmentID")
+                {
+                    CommandType = CommandType.Text,
+                    Connection = Connections.FDSConnection()
+                };
+                command.Parameters.Add(new SqlParameter("equipmentID", EquipmentId));
+                command.Parameters.Add(new SqlParameter("statusCode", statusCode));
+
+                // Execute the command
+                command.Connection.Open();
+                command.ExecuteNonQuery();
+
+                command.Connection.Close();
+
+                // After the execution of the command, set the local condition
+                Status = status;
+            }
+        }
+
+        /// <summary>
+        ///     Sets the name locally and in the database. If local name has not changed, database name did not change.
+        /// </summary>
+        /// <param name="name">New name for this equipment</param>
+        public void SetName(String name)
+        {
+            // create a command
+            var command = new SqlCommand("UPDATE Equipment SET name = @name WHERE equipmentID=@equipmentID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("equipmentID", EquipmentId));
+            command.Parameters.Add(new SqlParameter("name", name));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+
+            command.Connection.Close();
+
+            // After the execution of the command, set the local condition
+            Name = name;
+        }
+
+        /// <summary>
+        ///     Sets the Category locally and in the database. If local category has not changed, database category did not change.
+        /// </summary>
+        /// <param name="category">New category for this equipment</param>
+        public void SetCategory(String category)
+        {
+            // create a command
+            var command = new SqlCommand("UPDATE Equipment SET category = @category WHERE equipmentID=@equipmentID")
+            {
+                CommandType = CommandType.Text,
+                Connection = Connections.FDSConnection()
+            };
+            command.Parameters.Add(new SqlParameter("equipmentID", EquipmentId));
+            command.Parameters.Add(new SqlParameter("category", category));
+
+            // Execute the command
+            command.Connection.Open();
+            command.ExecuteNonQuery();
+
+            command.Connection.Close();
+
+            // After the execution of the command, set the local condition
+            Category = category;
+        }
+
+        #endregion
+    }
+}

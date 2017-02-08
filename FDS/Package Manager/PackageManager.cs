@@ -1,0 +1,156 @@
+﻿using System;
+using System.Windows.Forms;
+
+namespace Package_Manager
+{
+    public partial class FrmPackageManager : Form
+    {
+        //Numerical user ID (###) For Current Shift
+        private String UserID;
+
+        //Typical user (8.4) For Current Shift
+        private String NetID;
+
+        //HallID For Current Shift
+        private int HallID;
+
+        //OldHallID For Current Shift
+        private int OldHallID;
+
+        //HallName For Current Shift
+        private String HallName;
+
+        public FrmPackageManager(string ID)
+        {
+            UserID = ID;
+            NetID = FDS.Employee.GetNetID(UserID);
+            InitializeComponent();
+        }
+
+        private void PackageManager_Load(object sender, EventArgs e)
+        {
+            if (UserID != null)
+            {
+                String HostName = System.Net.Dns.GetHostName().ToLower();
+                HallID = FDS.Employee.GetHallByComputerName(HostName);
+                OldHallID = FDS.Employee.GetOldHallID_FromNew(HallID);
+                HallName = (FDS.Hall.GetHallById(HallID)).Name;
+
+                lblWelcome.Text = HallName + " Hall Package Manager";
+            }
+            else
+            {
+                Close();
+            }
+
+            GridViewRefresh();
+            //Format Cells of Gridview to [Currency = c, Date = d]
+            this.DGVpackageInventory.Columns["packageCost"].DefaultCellStyle.Format = "c";
+            this.DGVpackageInventory.Columns["packageDateReceived"].DefaultCellStyle.Format = "d";
+        }
+
+        #region PackageHandling
+
+        /*
+        *   Searches for students in the database based on the given parameters and HallID
+        *      Pre:Name
+        *      Post:Any records with matching like '%pre%' parameters
+        */
+
+        private void btnSearchStudentPackageDeliver_Click(object sender, EventArgs e)
+        {
+            BindingSource bs = new BindingSource();
+            bs.DataSource = DGVpackageInventory.DataSource;
+            String search = txtPackageSearch.Text.Replace("[", "").Replace("]", "");
+            bs.Filter = "StudentFor like '%" + search + "%' OR StudentFor like '%" + search + "%'";
+        }
+
+        /*
+         *   Searches for equipment in the database based on the given parameters
+         *      Pre:FirstName, LastName, RoomNumber
+         *      Post:Any records with matching like '%pre%' parameters
+         */
+
+        private void btnSearchStudentPackage_Click(object sender, EventArgs e)
+        {
+            String Name = txtStudentNamePackage.Text.ToString();
+            String rNum = textBoxStudentRoomNumberPackage.Text.ToString();
+            if (Name.Equals("") && rNum.Equals(""))
+            {
+                this.studentsForSearchByHallTableAdapter.Fill(this.frontDeskSuiteDataSet.StudentsForSearchByHall, HallID, Name, "-1");
+            }
+            else
+            {
+                this.studentsForSearchByHallTableAdapter.Fill(this.frontDeskSuiteDataSet.StudentsForSearchByHall, HallID, Name, rNum);
+            }
+        }
+
+        /*
+         * Method to ensure only one student is selected at a time for check out/in of items
+         *
+         */
+
+        private void DGVstudentsPackage_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            foreach (DataGridViewRow row in DGVstudentsPackage.Rows)
+            {
+                if (row.Cells["packageStudent"].Value != null && row.Cells["packageStudent"].Value.Equals("true"))
+                {
+                    row.Cells["packageStudent"].Value = false;
+                }
+            }
+        }
+
+        /*
+         * Method to receive packages
+         *  Records timestamp, emplyoee, student
+         */
+
+        private void btnReceivePackage_Click(object sender, EventArgs e)
+        {
+            foreach (DataGridViewRow row in DGVstudentsPackage.Rows)
+            {
+                if (row.Cells["packageStudent"].Value != null && row.Cells["packageStudent"].Value.Equals("true"))
+                {
+                    String StudentFor = row.Cells["packageNetID"].Value.ToString();
+                    String Description = textBoxPackageDescription.Text.ToString();
+                    decimal Cost = numericUpDownCostPackages.Value;
+
+                    DialogResult result = MessageBox.Show("Are You Sure You Want To Receive This Package?\n\n\tDescription: \"" + Description +
+                        "\"\n\tFor: " + StudentFor + "\n\tCost: " + Cost,
+                            "Receive Package", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        FDS.Package.ReceivePackage(HallID, StudentFor, Description, Cost, NetID);
+                        FDS.Package.ReceivePackageEmail(StudentFor, HallName, Cost);
+
+                        txtStudentNamePackage.Text = "";
+                        textBoxStudentRoomNumberPackage.Text = "";
+                        textBoxPackageDescription.Text = "";
+                        numericUpDownCostPackages.Value = 0;
+                        btnSearchStudentPackage_Click(this, e);
+                        GridViewRefresh();
+                        return;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+            MessageBox.Show("Please Select A Student!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        public void GridViewRefresh()
+        {
+            this.packagesForHallTableAdapter.Fill(this.frontDeskSuiteDataSet1.PackagesForHall, HallID);
+        }
+
+        #endregion PackageHandling
+
+        private void btnRefreshPackage_Click(object sender, EventArgs e)
+        {
+            GridViewRefresh();
+        }
+    }
+}
